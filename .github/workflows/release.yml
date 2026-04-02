@@ -56,7 +56,7 @@ jobs:
         id: git-cliff
         with:
           config: cliff.toml
-          args: -l --sort newest
+          args: -l --sort newest --offline
         env:
           OUTPUT: CHANGELOG.md
           GITHUB_REPO: ${{ github.repository }}
