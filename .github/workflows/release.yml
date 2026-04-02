@@ -1,0 +1,72 @@
+name: Publish Release
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+  
+env:
+  DOTNET_VERSION: 10.0.x
+  ZIP_FOLDER: publish
+  ZIP_NAME: remote-desktop-v${{ github.ref_name }}.zip
+  VERSION: ${{ github.ref_name }}
+
+jobs:
+  release:
+    if: github.repository == 'XDFUN/Flow.Launcher.Plugin.RemoteDesktop'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Set plugin version
+        shell: pwsh
+        run: |
+          $file = "plugin.json"
+          $json = Get-Content $file -Raw | ConvertFrom-Json
+
+          $json | Add-Member -NotePropertyName "Version" -NotePropertyValue "${{ github.event.release.tag_name }}"
+
+          $json | ConvertTo-Json -Depth 10 | Set-Content $file
+
+      - name: Publish
+        run: dotnet publish Flow.Launcher.Plugin.RemoteDesktop -c Release -r win-x64 --no-self-contained -p:Version="${{ github.event.release.tag_name }}" --output "${{ env.ZIP_FOLDER }}" -bl:publish.binlog
+
+      - name: Zip Publish
+        run: tar -a -cf "${{ env.ZIP_NAME }}" -C "${{ env.ZIP_FOLDER }}" *
+
+      - name: Upload Diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostics.binlog
+          path: publish.binlog
+
+      - name: git-cliff - Changelog Generator
+        uses: orhun/git-cliff-action@v4
+        id: git-cliff
+        with:
+          config: cliff.toml
+          args: -l --sort newest
+        env:
+          OUTPUT: CHANGELOG.md
+          GITHUB_REPO: ${{ github.repository }}
+
+      - name: Create the Github Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "v${{ env.VERSION }}" --repo="${{ github.repository }}" --title="v${{ env.VERSION }}" --generate-notes
+
+      - name: Upload release asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ env.VERSION }}" ${{ env.ZIP_NAME }} --clobber

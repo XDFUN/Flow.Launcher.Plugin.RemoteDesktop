@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flow.Launcher.Plugin.RemoteDesktop", "Flow.Launcher.Plugin.RemoteDesktop\Flow.Launcher.Plugin.RemoteDesktop.csproj", "{2171B381-EFCF-4A4B-86F7-01D07BBD6AAB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{663D0819-EFB3-4095-B282-11537DE0DBC4}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		appveyor.yml = appveyor.yml
+		debug.ps1 = debug.ps1
+		plugin.json = plugin.json
+		Readme.md = Readme.md
+		release.ps1 = release.ps1
+		LICENSE = LICENSE
+		cliff.toml = cliff.toml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{EB26A314-CC95-43B0-BD4F-3BD35FEB9282}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{AB1BAECD-EC9F-4ABC-9367-1A29371147EA}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\release.yml = .github\workflows\release.yml
+		.github\workflows\build.yml = .github\workflows\build.yml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2171B381-EFCF-4A4B-86F7-01D07BBD6AAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2171B381-EFCF-4A4B-86F7-01D07BBD6AAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2171B381-EFCF-4A4B-86F7-01D07BBD6AAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2171B381-EFCF-4A4B-86F7-01D07BBD6AAB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EB26A314-CC95-43B0-BD4F-3BD35FEB9282} = {663D0819-EFB3-4095-B282-11537DE0DBC4}
+		{AB1BAECD-EC9F-4ABC-9367-1A29371147EA} = {EB26A314-CC95-43B0-BD4F-3BD35FEB9282}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0-windows</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <AssemblyName>Flow.Launcher.Plugin.RemoteDesktop</AssemblyName>
+        <PackageId>Flow.Launcher.Plugin.RemoteDesktop</PackageId>
+        <Authors>XDFUN</Authors>
+        <PackageProjectUrl>https://github.com/XDFUN/Flow.Launcher.Plugin.RemoteDesktop</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/XDFUN/Flow.Launcher.Plugin.RemoteDesktop</RepositoryUrl>
+        <PackageTags>flow-launcher flow-plugin</PackageTags>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <DebugSymbols>false</DebugSymbols>
+        <DebugType>None</DebugType>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Content Include="Images/icon.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="../plugin.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Flow.Launcher.Plugin" Version="4.4.0"/>
+    </ItemGroup>
+
+</Project>
