@@ -3,7 +3,7 @@ name: Publish Release
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+'
 
 permissions:
   contents: write
@@ -12,7 +12,8 @@ env:
   DOTNET_VERSION: 10.0.x
   ZIP_FOLDER: publish
   ZIP_NAME: remote-desktop-v${{ github.ref_name }}.zip
-  VERSION: ${{ github.ref_name }}
+  VERSION_WITH_V: v${{ github.ref_name }}
+  VERSION_NO_V: ${{ github.ref_name }}
 
 jobs:
   release:
@@ -34,12 +35,12 @@ jobs:
           $file = "plugin.json"
           $json = Get-Content $file -Raw | ConvertFrom-Json
 
-          $json | Add-Member -NotePropertyName "Version" -NotePropertyValue "${{ env.VERSION }}"
+          $json | Add-Member -NotePropertyName "Version" -NotePropertyValue "${{ env.VERSION_NO_V }}"
 
           $json | ConvertTo-Json -Depth 10 | Set-Content $file
 
       - name: Publish
-        run: dotnet publish Flow.Launcher.Plugin.RemoteDesktop -c Release -r win-x64 --no-self-contained -p:Version="${{ env.VERSION }}" --output "${{ env.ZIP_FOLDER }}" -bl:publish.binlog
+        run: dotnet publish Flow.Launcher.Plugin.RemoteDesktop -c Release -r win-x64 --no-self-contained -p:Version="${{ env.VERSION_NO_V }}" --output "${{ env.ZIP_FOLDER }}" -bl:publish.binlog
 
       - name: Zip Publish
         run: tar -a -cf "${{ env.ZIP_NAME }}" -C "${{ env.ZIP_FOLDER }}" *
@@ -64,9 +65,9 @@ jobs:
       - name: Create the Github Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "${{ env.VERSION }}" --repo="${{ github.repository }}" --title="${{ env.VERSION }}" --notes-file "CHANGELOG.md"
+        run: gh release create "${{ env.VERSION_WITH_V }}" --repo="${{ github.repository }}" --title="${{ env.VERSION_WITH_V }}" --notes-file "CHANGELOG.md"
 
       - name: Upload release asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ env.VERSION }}" ${{ env.ZIP_NAME }} --clobber
+        run: gh release upload "${{ env.VERSION_WITH_V }}" ${{ env.ZIP_NAME }} --clobber
