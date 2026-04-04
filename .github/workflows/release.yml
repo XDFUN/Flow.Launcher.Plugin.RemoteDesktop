@@ -8,9 +8,11 @@ on:
         type: string
         required: true
 
+run-name: Publish Release ${{ github.event.inputs.version }}
+
 permissions:
   contents: write
-  
+
 env:
   DOTNET_VERSION: 10.0.x
   ZIP_FOLDER: publish
