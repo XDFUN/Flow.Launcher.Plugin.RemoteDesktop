@@ -1,9 +1,12 @@
 name: Publish Release
 
 on:
-  push:
-    tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch: 
+    inputs:
+      version:
+        description: '<major>.<minor>.<patch>-<pre-release>'
+        type: string
+        required: true
 
 permissions:
   contents: write
@@ -11,11 +14,22 @@ permissions:
 env:
   DOTNET_VERSION: 10.0.x
   ZIP_FOLDER: publish
-  ZIP_NAME: remote-desktop-v${{ github.ref_name }}.zip
-  VERSION_WITH_V: v${{ github.ref_name }}
-  VERSION_NO_V: ${{ github.ref_name }}
+  ZIP_NAME: remote-desktop-v${{ github.event.inputs.version }}.zip
+  VERSION_WITH_V: v${{ github.event.inputs.version }}
+  VERSION_NO_V: ${{ github.event.inputs.version }}
 
 jobs:
+  pre-release-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Tag
+        id: check-tag
+        run: |
+          if [[ ! ${{ env.VERSION_NO_V }} =~ ^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-((0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$ ]]; then
+            echo "Invalid version: ${{ env.VERSION_NO_V }}"
+            exit 1
+          fi
+
   release:
     if: github.repository == 'XDFUN/Flow.Launcher.Plugin.RemoteDesktop'
     runs-on: windows-latest
