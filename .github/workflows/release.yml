@@ -24,11 +24,11 @@ jobs:
     steps:
       - name: Check Tag
         id: check-tag
+        env:
+            TAG: ${{ env.VERSION_NO_V }}
         run: |
-          if [[ ! ${{ env.VERSION_NO_V }} =~ ^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-((0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$ ]]; then
-            echo "Invalid version: ${{ env.VERSION_NO_V }}"
-            exit 1
-          fi
+          echo "Validating semantic version: ${TAG}"
+          echo "${TAG}" | grep -P '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-((0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$'
 
   release:
     if: github.repository == 'XDFUN/Flow.Launcher.Plugin.RemoteDesktop'
