@@ -15,7 +15,7 @@ permissions:
 
 env:
   DOTNET_VERSION: 10.0.x
-  PROJECT_PATH: ./src/Flow.Launcher.Plugin.RemoteDesktop.csproj
+  PROJECT_PATH: ./src/Flow.Launcher.Plugin.RemoteDesktop/Flow.Launcher.Plugin.RemoteDesktop.csproj
   ZIP_FOLDER: publish
   ZIP_NAME: remote-desktop-v${{ github.event.inputs.version }}.zip
   VERSION_WITH_V: v${{ github.event.inputs.version }}

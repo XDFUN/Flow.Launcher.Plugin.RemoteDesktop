@@ -12,7 +12,7 @@ on:
       - src/**
 
 env:
-  PROJECT_PATH: ./src/Flow.Launcher.Plugin.RemoteDesktop.csproj
+  PROJECT_PATH: ./src/Flow.Launcher.Plugin.RemoteDesktop.sln
 
 jobs:
   build:
