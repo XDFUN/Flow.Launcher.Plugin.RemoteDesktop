@@ -4,26 +4,30 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flow.Launcher.Plugin.Remote
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{663D0819-EFB3-4095-B282-11537DE0DBC4}"
 	ProjectSection(SolutionItems) = preProject
-		.gitignore = .gitignore
-		appveyor.yml = appveyor.yml
-		debug.ps1 = debug.ps1
-		plugin.json = plugin.json
-		README.md = README.md
-		release.ps1 = release.ps1
-		LICENSE = LICENSE
-		cliff.toml = cliff.toml
+		.gitignore = ..\.gitignore
+		appveyor.yml = ..\appveyor.yml
+		README.md = ..\README.md
+		LICENSE = ..\LICENSE
+		cliff.toml = ..\cliff.toml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{EB26A314-CC95-43B0-BD4F-3BD35FEB9282}"
 	ProjectSection(SolutionItems) = preProject
-		.github\ISSUE_TEMPLATE\feature_request.md = .github\ISSUE_TEMPLATE\feature_request.md
-		.github\ISSUE_TEMPLATE\bug_report.md = .github\ISSUE_TEMPLATE\bug_report.md
+		.github\ISSUE_TEMPLATE\feature_request.md = ..\.github\ISSUE_TEMPLATE\feature_request.md
+		.github\ISSUE_TEMPLATE\bug_report.md = ..\.github\ISSUE_TEMPLATE\bug_report.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{AB1BAECD-EC9F-4ABC-9367-1A29371147EA}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\release.yml = .github\workflows\release.yml
-		.github\workflows\build.yml = .github\workflows\build.yml
+		.github\workflows\release.yml = ..\.github\workflows\release.yml
+		.github\workflows\build.yml = ..\.github\workflows\build.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{94C5965D-33CE-4F62-B993-94EFAF47F99B}"
+	ProjectSection(SolutionItems) = preProject
+		debug.ps1 = debug.ps1
+		release.ps1 = release.ps1
+		plugin.json = plugin.json
 	EndProjectSection
 EndProject
 Global
@@ -40,5 +44,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{EB26A314-CC95-43B0-BD4F-3BD35FEB9282} = {663D0819-EFB3-4095-B282-11537DE0DBC4}
 		{AB1BAECD-EC9F-4ABC-9367-1A29371147EA} = {EB26A314-CC95-43B0-BD4F-3BD35FEB9282}
+		{94C5965D-33CE-4F62-B993-94EFAF47F99B} = {663D0819-EFB3-4095-B282-11537DE0DBC4}
 	EndGlobalSection
 EndGlobal
