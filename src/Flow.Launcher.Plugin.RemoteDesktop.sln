@@ -30,6 +30,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{94C5965D-33C
 		plugin.json = plugin.json
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ISSUE_TEMPLATE", "ISSUE_TEMPLATE", "{E73ADF0B-EF42-4BEB-BDEF-74B97A8550AC}"
+	ProjectSection(SolutionItems) = preProject
+		..\.github\ISSUE_TEMPLATE\bug_report.md = ..\.github\ISSUE_TEMPLATE\bug_report.md
+		..\.github\ISSUE_TEMPLATE\feature_request.md = ..\.github\ISSUE_TEMPLATE\feature_request.md
+		..\.github\ISSUE_TEMPLATE\documentation.md = ..\.github\ISSUE_TEMPLATE\documentation.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,5 +52,6 @@ Global
 		{EB26A314-CC95-43B0-BD4F-3BD35FEB9282} = {663D0819-EFB3-4095-B282-11537DE0DBC4}
 		{AB1BAECD-EC9F-4ABC-9367-1A29371147EA} = {EB26A314-CC95-43B0-BD4F-3BD35FEB9282}
 		{94C5965D-33CE-4F62-B993-94EFAF47F99B} = {663D0819-EFB3-4095-B282-11537DE0DBC4}
+		{E73ADF0B-EF42-4BEB-BDEF-74B97A8550AC} = {EB26A314-CC95-43B0-BD4F-3BD35FEB9282}
 	EndGlobalSection
 EndGlobal
