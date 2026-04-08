@@ -14,14 +14,16 @@ namespace Flow.Launcher.Plugin.RemoteDesktop;
 /// </summary>
 public class RemoteDesktop : IPlugin
 {
-    private const string RECENT_CONNECTIONS = @"Software\Microsoft\Terminal Server Client\Default";
-    private const string CONNECTION_HISTORY = @"Software\Microsoft\Terminal Server Client\Servers";
     private const string ICO_PATH = "Images/icon.png";
-    private const double MAX_RECENT_SCORE = 20.0;
 
     private PluginInitContext? _context;
     private ContextLogger<RemoteDesktop>? _logger;
-    private string? _mstscPath;
+
+    private RemoteDesktopSettings Settings
+    {
+        get => field ?? throw new InvalidOperationException("Settings not initialized");
+        set;
+    }
 
     /// <summary>
     ///     Initializes the plugin.
@@ -31,10 +33,8 @@ public class RemoteDesktop : IPlugin
     {
         // mstsc
         _context = context;
+        Settings = new RemoteDesktopSettings(); //_context.API.LoadSettingJsonStorage<RemoteDesktopSettings>();
         _logger = new ContextLogger<RemoteDesktop>(context);
-
-        string systemDir = Environment.GetFolderPath(Environment.SpecialFolder.System);
-        _mstscPath = Path.Combine(systemDir, "mstsc.exe");
     }
 
     /// <summary>
@@ -45,6 +45,22 @@ public class RemoteDesktop : IPlugin
         if (_context == null)
         {
             return [];
+        }
+
+        if (!File.Exists(Settings?.MstscPath))
+        {
+            _logger?.LogWarn("mstsc.exe not found");
+
+            return
+            [
+                new Result
+                {
+                    Title = "Could not find mstsc.exe",
+                    SubTitle = $"Ensure that mstsc.exe is installed and located at {Settings?.MstscPath}",
+                    IcoPath = ICO_PATH,
+                    Action = _ => false,
+                },
+            ];
         }
 
         var results = new List<Result>();
@@ -106,7 +122,7 @@ public class RemoteDesktop : IPlugin
 
             if (recents.TryGetValue(connection, out double weight))
             {
-                recencyBonus = MAX_RECENT_SCORE - (weight * (MAX_RECENT_SCORE / Math.Max(totalRecents, 1)));
+                recencyBonus = Settings.MaxRecentScore - (weight * (Settings.MaxRecentScore / Math.Max(totalRecents, 1)));
                 recencyBonus = Math.Max(0, recencyBonus);
             }
 
@@ -144,7 +160,7 @@ public class RemoteDesktop : IPlugin
 
     private Dictionary<string, double> GetRecentConnection()
     {
-        using RegistryKey? recentlyUsed = Registry.CurrentUser.OpenSubKey(RECENT_CONNECTIONS);
+        using RegistryKey? recentlyUsed = OpenRegistryKey(Settings.RecentConnectionsKey);
 
         var result = new Dictionary<string, double>();
 
@@ -182,7 +198,7 @@ public class RemoteDesktop : IPlugin
 
     private string[] GetConnectionHistory()
     {
-        using RegistryKey? historyKey = Registry.CurrentUser.OpenSubKey(CONNECTION_HISTORY);
+        using RegistryKey? historyKey = OpenRegistryKey(Settings.ConnectionHistoryKey);
 
         if (historyKey != null)
         {
@@ -207,7 +223,7 @@ public class RemoteDesktop : IPlugin
                 Process.Start(
                     new ProcessStartInfo
                     {
-                        FileName = _mstscPath,
+                        FileName = Settings?.MstscPath,
                         Arguments = $"/v:{ipOrHostname}",
                         UseShellExecute = true,
                         CreateNoWindow = true,
@@ -217,6 +233,20 @@ public class RemoteDesktop : IPlugin
                 return true;
             },
         };
+    }
+
+    private RegistryKey? OpenRegistryKey(string keyPath)
+    {
+        try
+        {
+            return Registry.CurrentUser.OpenSubKey(keyPath, true);
+        }
+        catch (Exception e)
+        {
+            _logger?.LogError($"Failed to open registry key {keyPath}", e);
+        }
+
+        return null;
     }
 
     private class ContextLogger<T>(PluginInitContext context)
