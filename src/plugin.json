@@ -1,7 +1,7 @@
 {
     "ID": "518E2D95-D89E-44E6-8B99-3A71D977E93A",
     "ActionKeyword": "rdp",
-    "Name": "RemoteDesktop",
+    "Name": "Remote Desktop",
     "Description": "A plugin to start remote desktop connections",
     "Author": "XDFUN",
     "Language": "csharp",
