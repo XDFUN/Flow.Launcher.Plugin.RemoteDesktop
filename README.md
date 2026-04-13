@@ -7,6 +7,8 @@ A plugin for the [Flow launcher](https://github.com/Flow-Launcher/Flow.Launcher)
 
     rdp <ip or hostname>
 
+![Gifs shows the flow launcher window in which the text "rdp 192.168.0.1" and "rdp hostname" are entered](./docs/rdp-plugin-example.gif "example gif")
+
 ## Third-Party
 
 1. Icon [Remote Desktop](https://icons8.com/icon/lqN1-eJ3he4o/remote-desktop) provided by [Icons8](https://icons8.com)
