@@ -47,30 +47,42 @@ public class RemoteDesktop : IPlugin
             return [];
         }
 
-        if (!File.Exists(Settings?.MstscPath))
+        if (!File.Exists(Settings.MstscPath))
         {
             _logger?.LogWarn("mstsc.exe not found");
 
-            return
-            [
-                new Result
-                {
-                    Title = "Could not find mstsc.exe",
-                    SubTitle = $"Ensure that mstsc.exe is installed and located at {Settings?.MstscPath}",
-                    IcoPath = ICO_PATH,
-                    Action = _ => false,
-                },
-            ];
+            _context.API.ShowMsgError(
+                "mstsc.exe not found",
+                "Please ensure that mstsc.exe is installed and located at " + Settings.MstscPath
+            );
+
+            return [];
         }
 
-        var results = new List<Result>();
+        var results = new List<string>();
+
+        QueryCore(query, results);
+        QueryPostfix(query, results);
+
+        return results.Select(GetResult).ToList();
+    }
+
+    private void QueryCore(Query? query, List<string> results)
+    {
+        if (_context == null)
+        {
+            return;
+        }
+
         string search = query?.Search ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(search))
         {
             _logger?.LogDebug("Query executed with empty search term");
 
-            return SearchRecent(search);
+            results.AddRange(SearchRecent(search));
+
+            return;
         }
 
         Dictionary<string, double> recentConnections = GetRecentConnection();
@@ -79,20 +91,32 @@ public class RemoteDesktop : IPlugin
 
         if (connectionHistory.Length == 0)
         {
-            return SearchRecent(search);
+            results.AddRange(SearchRecent(search));
+
+            return;
         }
 
         results.AddRange(
-            ScoreConnections(search, connectionHistory, recentConnections)
-                .Select(matchResult => GetResult(matchResult.Connection))
+            ScoreConnections(search, connectionHistory, recentConnections).Select(matchResult => matchResult.Connection)
         );
+    }
+
+    private void QueryPostfix(Query? query, List<string> results)
+    {
+        string search = query?.Search ?? string.Empty;
+
+        if (results.Contains(search))
+        {
+            results.Remove(search);
+            results.Insert(0, search);
+
+            return;
+        }
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            results.Add(GetResult(search));
+            results.Add(search);
         }
-
-        return results;
     }
 
     private List<ScoredConnection> ScoreConnections(
@@ -122,7 +146,9 @@ public class RemoteDesktop : IPlugin
 
             if (recents.TryGetValue(connection, out double weight))
             {
-                recencyBonus = Settings.MaxRecentScore - (weight * (Settings.MaxRecentScore / Math.Max(totalRecents, 1)));
+                recencyBonus = Settings.MaxRecentScore
+                               - (weight * (Settings.MaxRecentScore / Math.Max(totalRecents, 1)));
+
                 recencyBonus = Math.Max(0, recencyBonus);
             }
 
@@ -142,20 +168,20 @@ public class RemoteDesktop : IPlugin
         return scoredConnections.OrderByDescending(c => c.TotalScore).ToList();
     }
 
-    private List<Result> SearchRecent(string search)
+    private List<string> SearchRecent(string search)
     {
         if (!string.IsNullOrWhiteSpace(search))
         {
             return GetRecentConnection()
                    .Where(x => _context?.API.FuzzySearch(search, x.Key).Success ?? true)
                    .OrderBy(x => x.Value)
-                   .Select(x => GetResult(x.Key))
+                   .Select(x => x.Key)
                    .ToList();
         }
 
         _logger?.LogDebug("Query executed with empty search term");
 
-        return GetRecentConnection().OrderBy(x => x.Value).Select(x => GetResult(x.Key)).ToList();
+        return GetRecentConnection().OrderBy(x => x.Value).Select(x => x.Key).ToList();
     }
 
     private Dictionary<string, double> GetRecentConnection()
@@ -223,7 +249,7 @@ public class RemoteDesktop : IPlugin
                 Process.Start(
                     new ProcessStartInfo
                     {
-                        FileName = Settings?.MstscPath,
+                        FileName = Settings.MstscPath,
                         Arguments = $"/v:{ipOrHostname}",
                         UseShellExecute = true,
                         CreateNoWindow = true,
