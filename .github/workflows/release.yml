@@ -20,6 +20,7 @@ env:
   ZIP_NAME: remote-desktop-v${{ github.event.inputs.version }}.zip
   VERSION_WITH_V: v${{ github.event.inputs.version }}
   VERSION_NO_V: ${{ github.event.inputs.version }}
+  INSTALL_SCRIPT_LOCATION: ./scripts/install.ps1
 
 jobs:
   pre-release-check:
@@ -59,15 +60,19 @@ jobs:
       - name: Publish
         run: dotnet publish  ${{ env.PROJECT_PATH }} -c Release -r win-x64 --no-self-contained -p:Version="${{ env.VERSION_NO_V }}" --output "${{ env.ZIP_FOLDER }}" -bl:publish.binlog
 
-      - name: Zip Publish
-        run: tar -a -cf "${{ env.ZIP_NAME }}" -C "${{ env.ZIP_FOLDER }}" *
-
       - name: Upload Diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: diagnostics.binlog
           path: publish.binlog
+
+      - name: Zip Publish
+        run: tar -a -cf "${{ env.ZIP_NAME }}" -C "${{ env.ZIP_FOLDER }}" *
+
+      - name: Create install script
+        shell: pwsh
+        run: (Get-Content "${{ env.INSTALL_SCRIPT_LOCATION }}") -replace '\$VERSION = ".*"', '$VERSION = "${{ env.VERSION_WITH_V }}"' | Set-Content "${{ env.INSTALL_SCRIPT_LOCATION }}"
 
       - name: git-cliff - Changelog Generator
         uses: orhun/git-cliff-action@v4
@@ -87,4 +92,4 @@ jobs:
       - name: Upload release asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ env.VERSION_WITH_V }}" ${{ env.ZIP_NAME }} --clobber
+        run: gh release upload "${{ env.VERSION_WITH_V }}" "${{ env.ZIP_NAME }}" "${{ env.INSTALL_SCRIPT_LOCATION }}" --clobber

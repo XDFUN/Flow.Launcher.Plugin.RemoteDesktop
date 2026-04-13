@@ -37,6 +37,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ISSUE_TEMPLATE", "ISSUE_TEM
 		..\.github\ISSUE_TEMPLATE\documentation.md = ..\.github\ISSUE_TEMPLATE\documentation.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{545857AD-8211-4649-9223-645BADF2EFB6}"
+	ProjectSection(SolutionItems) = preProject
+		..\scripts\install.ps1 = ..\scripts\install.ps1
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,5 +58,6 @@ Global
 		{AB1BAECD-EC9F-4ABC-9367-1A29371147EA} = {EB26A314-CC95-43B0-BD4F-3BD35FEB9282}
 		{94C5965D-33CE-4F62-B993-94EFAF47F99B} = {663D0819-EFB3-4095-B282-11537DE0DBC4}
 		{E73ADF0B-EF42-4BEB-BDEF-74B97A8550AC} = {EB26A314-CC95-43B0-BD4F-3BD35FEB9282}
+		{545857AD-8211-4649-9223-645BADF2EFB6} = {663D0819-EFB3-4095-B282-11537DE0DBC4}
 	EndGlobalSection
 EndGlobal
