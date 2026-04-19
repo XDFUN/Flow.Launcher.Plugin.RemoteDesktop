@@ -12,7 +12,7 @@ namespace Flow.Launcher.Plugin.RemoteDesktop;
 /// <summary>
 ///     A plugin for Flow.Launcher to open RDP connections.
 /// </summary>
-public class RemoteDesktop : IPlugin
+public class RemoteDesktop : IPlugin, IPluginI18n
 {
     private const string ICO_PATH = "Images/icon.png";
 
@@ -25,14 +25,20 @@ public class RemoteDesktop : IPlugin
         set;
     }
 
+    private Localization Localization
+    {
+        get => field ?? throw new InvalidOperationException("Localization not initialized");
+        set;
+    }
+
     /// <summary>
     ///     Initializes the plugin.
     /// </summary>
     /// <param name="context"></param>
     public void Init(PluginInitContext context)
     {
-        // mstsc
         _context = context;
+        Localization = new Localization(context.API);
         Settings = new RemoteDesktopSettings(); //_context.API.LoadSettingJsonStorage<RemoteDesktopSettings>();
         _logger = new ContextLogger<RemoteDesktop>(context);
     }
@@ -65,6 +71,24 @@ public class RemoteDesktop : IPlugin
         QueryPostfix(query, results);
 
         return results.Select(GetResult).ToList();
+    }
+
+    /// <summary>
+    ///     Retrieves the translated title of the plugin.
+    /// </summary>
+    /// <returns>The localized plugin title.</returns>
+    public string GetTranslatedPluginTitle()
+    {
+        return Localization.PluginName;
+    }
+
+    /// <summary>
+    ///     Retrieves the translated description of the plugin.
+    /// </summary>
+    /// <returns>The localized plugin description.</returns>
+    public string GetTranslatedPluginDescription()
+    {
+        return Localization.PluginDescription;
     }
 
     private void QueryCore(Query? query, List<string> results)
@@ -242,7 +266,7 @@ public class RemoteDesktop : IPlugin
         {
             Title = ipOrHostname,
             AutoCompleteText = ipOrHostname,
-            SubTitle = "Connect with Remote Desktop",
+            SubTitle = Localization.ResultSubtitle,
             IcoPath = ICO_PATH,
             Action = _ =>
             {
