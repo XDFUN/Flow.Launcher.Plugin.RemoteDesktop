@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+using Flow.Launcher.Plugin.RemoteDesktop.Settings;
 using Flow.Launcher.Plugin.SharedModels;
 using Microsoft.Win32;
 
@@ -15,7 +17,9 @@ namespace Flow.Launcher.Plugin.RemoteDesktop;
 public class RemoteDesktop : IPlugin, IPluginI18n
 {
     private const string ICO_PATH = "Images/icon.png";
-
+    
+    private static readonly string s_cmdKeyExe = Environment.ExpandEnvironmentVariables(@"%SystemRoot%\system32\cmdkey.exe");
+    
     private PluginInitContext? _context;
     private ContextLogger<RemoteDesktop>? _logger;
 
@@ -39,7 +43,7 @@ public class RemoteDesktop : IPlugin, IPluginI18n
     {
         _context = context;
         Localization = new Localization(context.API);
-        Settings = new RemoteDesktopSettings(); //_context.API.LoadSettingJsonStorage<RemoteDesktopSettings>();
+        Settings = _context.API.LoadSettingJsonStorage<RemoteDesktopSettings>();
         _logger = new ContextLogger<RemoteDesktop>(context);
     }
 
@@ -210,7 +214,7 @@ public class RemoteDesktop : IPlugin, IPluginI18n
 
     private Dictionary<string, double> GetRecentConnection()
     {
-        using RegistryKey? recentlyUsed = OpenRegistryKey(Settings.RecentConnectionsKey);
+        using RegistryKey? recentlyUsed = OpenRegistryKey(@"Software\Microsoft\Terminal Server Client\Default");
 
         var result = new Dictionary<string, double>();
 
@@ -248,7 +252,7 @@ public class RemoteDesktop : IPlugin, IPluginI18n
 
     private string[] GetConnectionHistory()
     {
-        using RegistryKey? historyKey = OpenRegistryKey(Settings.ConnectionHistoryKey);
+        using RegistryKey? historyKey = OpenRegistryKey(@"Software\Microsoft\Terminal Server Client\Servers");
 
         if (historyKey != null)
         {
@@ -262,6 +266,8 @@ public class RemoteDesktop : IPlugin, IPluginI18n
 
     private Result GetResult(string ipOrHostname)
     {
+        string? user = GetDefaultUser(ipOrHostname);
+
         return new Result
         {
             Title = ipOrHostname,
@@ -270,15 +276,20 @@ public class RemoteDesktop : IPlugin, IPluginI18n
             IcoPath = ICO_PATH,
             Action = _ =>
             {
-                Process.Start(
-                    new ProcessStartInfo
-                    {
-                        FileName = Settings.MstscPath,
-                        Arguments = $"/v:{ipOrHostname}",
-                        UseShellExecute = true,
-                        CreateNoWindow = true,
-                    }
-                );
+                var rdcProcess = new Process();
+                rdcProcess.StartInfo.UseShellExecute = true;
+                rdcProcess.StartInfo.CreateNoWindow = true;
+
+                if (user != null)
+                {
+                    rdcProcess.StartInfo.FileName = s_cmdKeyExe;
+                    rdcProcess.StartInfo.Arguments = $"/generic:TERMSRV/{ipOrHostname} /user:{user}";
+                    rdcProcess.Start();
+                }
+
+                rdcProcess.StartInfo.FileName = Settings.MstscPath;
+                rdcProcess.StartInfo.Arguments = $"/v:{ipOrHostname}";
+                rdcProcess.Start();
 
                 return true;
             },
@@ -297,6 +308,24 @@ public class RemoteDesktop : IPlugin, IPluginI18n
         }
 
         return null;
+    }
+
+    private string? GetDefaultUser(string ipOrHostname)
+    {
+        if (Settings.UserOverride == null)
+        {
+            return Settings.DefaultUser;
+        }
+
+        foreach ((Regex regex, string user) in Settings.UserOverride)
+        {
+            if (regex.IsMatch(ipOrHostname))
+            {
+                return user;
+            }
+        }
+
+        return Settings.DefaultUser;
     }
 
     private class ContextLogger<T>(PluginInitContext context)
