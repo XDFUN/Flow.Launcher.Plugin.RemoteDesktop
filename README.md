@@ -5,6 +5,10 @@ A plugin for the [Flow launcher](https://github.com/Flow-Launcher/Flow.Launcher)
 
 ## Installation
 
+### Plugin Store
+
+The plugin is available in the [Flow Launcher plugin store](https://www.flowlauncher.com/plugins/remote-desktop-518E2D95-D89E-44E6-8B99-3A71D977E93A/).
+
 ### Manually
 
 1. Download the latest release from [here](https://github.com/XDFUN/Flow.Launcher.Plugin.RemoteDesktop/releases)
