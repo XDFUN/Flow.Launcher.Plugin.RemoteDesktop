@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
 
 namespace Flow.Launcher.Plugin.RemoteDesktop.Settings;
 
@@ -18,7 +17,7 @@ public class RemoteDesktopSettings
     /// <summary>
     /// User overrides for specific host names or ip addresses.
     /// </summary>
-    public Dictionary<Regex, string>? UserOverride { get; set; }
+    public Dictionary<string, string>? UserOverride { get; set; }
 
     /// <summary>
     ///     The path to the mstsc.exe executable.

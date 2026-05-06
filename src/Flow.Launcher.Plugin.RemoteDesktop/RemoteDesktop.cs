@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 using Flow.Launcher.Plugin.RemoteDesktop.Settings;
 using Flow.Launcher.Plugin.SharedModels;
-using Microsoft.Win32;
 
 namespace Flow.Launcher.Plugin.RemoteDesktop;
 
@@ -17,9 +14,7 @@ namespace Flow.Launcher.Plugin.RemoteDesktop;
 public class RemoteDesktop : IPlugin, IPluginI18n
 {
     private const string ICO_PATH = "Images/icon.png";
-    
-    private static readonly string s_cmdKeyExe = Environment.ExpandEnvironmentVariables(@"%SystemRoot%\system32\cmdkey.exe");
-    
+
     private PluginInitContext? _context;
     private ContextLogger<RemoteDesktop>? _logger;
 
@@ -35,6 +30,18 @@ public class RemoteDesktop : IPlugin, IPluginI18n
         set;
     }
 
+    private RegistryManager RegistryManager
+    {
+        get => field ?? throw new InvalidOperationException("RegistryManager not initialized");
+        set;
+    }
+
+    private UsernameSelector UsernameSelector
+    {
+        get => field ?? throw new InvalidOperationException("UsernameSelector not initialized");
+        set;
+    }
+
     /// <summary>
     ///     Initializes the plugin.
     /// </summary>
@@ -42,9 +49,11 @@ public class RemoteDesktop : IPlugin, IPluginI18n
     public void Init(PluginInitContext context)
     {
         _context = context;
+        _logger = new ContextLogger<RemoteDesktop>(context);
         Localization = new Localization(context.API);
         Settings = _context.API.LoadSettingJsonStorage<RemoteDesktopSettings>();
-        _logger = new ContextLogger<RemoteDesktop>(context);
+        RegistryManager = new RegistryManager(context);
+        UsernameSelector = new UsernameSelector(context, Settings);
     }
 
     /// <summary>
@@ -71,8 +80,11 @@ public class RemoteDesktop : IPlugin, IPluginI18n
 
         var results = new List<string>();
 
-        QueryCore(query, results);
-        QueryPostfix(query, results);
+        string search = query?.Search ?? string.Empty;
+        search = search.Trim();
+
+        QueryCore(search, results);
+        QueryPostfix(search, results);
 
         return results.Select(GetResult).ToList();
     }
@@ -95,14 +107,12 @@ public class RemoteDesktop : IPlugin, IPluginI18n
         return Localization.PluginDescription;
     }
 
-    private void QueryCore(Query? query, List<string> results)
+    private void QueryCore(string search, List<string> results)
     {
         if (_context == null)
         {
             return;
         }
-
-        string search = query?.Search ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(search))
         {
@@ -113,9 +123,9 @@ public class RemoteDesktop : IPlugin, IPluginI18n
             return;
         }
 
-        Dictionary<string, double> recentConnections = GetRecentConnection();
+        Dictionary<string, double> recentConnections = RegistryManager.GetRecentConnection();
 
-        string[] connectionHistory = GetConnectionHistory();
+        string[] connectionHistory = RegistryManager.GetConnectionHistory();
 
         if (connectionHistory.Length == 0)
         {
@@ -129,14 +139,14 @@ public class RemoteDesktop : IPlugin, IPluginI18n
         );
     }
 
-    private void QueryPostfix(Query? query, List<string> results)
+    private void QueryPostfix(string search, List<string> results)
     {
-        string search = query?.Search ?? string.Empty;
+        List<string> others = results.FindAll(x => x.Equals(search, StringComparison.OrdinalIgnoreCase));
 
-        if (results.Contains(search))
+        if (others.Count > 0)
         {
-            results.Remove(search);
-            results.Insert(0, search);
+            results.RemoveAll(others.Contains);
+            results.Insert(0, others[0]);
 
             return;
         }
@@ -200,95 +210,52 @@ public class RemoteDesktop : IPlugin, IPluginI18n
     {
         if (!string.IsNullOrWhiteSpace(search))
         {
-            return GetRecentConnection()
-                   .Where(x => _context?.API.FuzzySearch(search, x.Key).Success ?? true)
-                   .OrderBy(x => x.Value)
-                   .Select(x => x.Key)
-                   .ToList();
+            return RegistryManager.GetRecentConnection()
+                                  .Where(x => _context?.API.FuzzySearch(search, x.Key).Success ?? true)
+                                  .OrderBy(x => x.Value)
+                                  .Select(x => x.Key)
+                                  .ToList();
         }
 
         _logger?.LogDebug("Query executed with empty search term");
 
-        return GetRecentConnection().OrderBy(x => x.Value).Select(x => x.Key).ToList();
-    }
-
-    private Dictionary<string, double> GetRecentConnection()
-    {
-        using RegistryKey? recentlyUsed = OpenRegistryKey(@"Software\Microsoft\Terminal Server Client\Default");
-
-        var result = new Dictionary<string, double>();
-
-        if (recentlyUsed == null)
-        {
-            _logger?.LogDebug("Failed to open registry key for recent connections");
-
-            return result;
-        }
-
-        foreach (string keyName in recentlyUsed.GetValueNames())
-        {
-            object? value = recentlyUsed.GetValue(keyName);
-
-            if (value is not string ipOrHostname)
-            {
-                _logger?.LogDebug($"Failed to get value for key {keyName}");
-
-                continue;
-            }
-
-            // MRU<index>
-            if (double.TryParse(keyName[3..], out double weight))
-            {
-                result[ipOrHostname] = weight;
-            }
-            else
-            {
-                _logger?.LogDebug($"Failed to parse weight for key {keyName}");
-            }
-        }
-
-        return result;
-    }
-
-    private string[] GetConnectionHistory()
-    {
-        using RegistryKey? historyKey = OpenRegistryKey(@"Software\Microsoft\Terminal Server Client\Servers");
-
-        if (historyKey != null)
-        {
-            return historyKey.GetSubKeyNames();
-        }
-
-        _logger?.LogDebug("Failed to open registry key for recent connections");
-
-        return [];
+        return RegistryManager.GetRecentConnection().OrderBy(x => x.Value).Select(x => x.Key).ToList();
     }
 
     private Result GetResult(string ipOrHostname)
     {
         string? user = GetDefaultUser(ipOrHostname);
+        string title = ipOrHostname;
+
+        if (!string.IsNullOrWhiteSpace(user))
+        {
+            title += $" ({user})";
+        }
 
         return new Result
         {
-            Title = ipOrHostname,
+            Title = title,
             AutoCompleteText = ipOrHostname,
             SubTitle = Localization.ResultSubtitle,
             IcoPath = ICO_PATH,
             Action = _ =>
             {
-                var rdcProcess = new Process();
-                rdcProcess.StartInfo.UseShellExecute = true;
-                rdcProcess.StartInfo.CreateNoWindow = true;
+                _logger?.LogDebug($"Opening connection to {ipOrHostname}");
+                RegistryManager.CreateServerHint(ipOrHostname, user);
 
-                if (user != null)
+                var processInfo = new ProcessStartInfo
                 {
-                    rdcProcess.StartInfo.FileName = s_cmdKeyExe;
-                    rdcProcess.StartInfo.Arguments = $"/generic:TERMSRV/{ipOrHostname} /user:{user}";
-                    rdcProcess.Start();
-                }
+                    FileName = Settings.MstscPath,
+                    Arguments = $"/v:{ipOrHostname}",
+                    UseShellExecute = true,
+                    CreateNoWindow = true,
+                };
 
-                rdcProcess.StartInfo.FileName = Settings.MstscPath;
-                rdcProcess.StartInfo.Arguments = $"/v:{ipOrHostname}";
+                var rdcProcess = new Process
+                {
+                    StartInfo = processInfo,
+                };
+
                 rdcProcess.Start();
 
                 return true;
@@ -296,62 +263,11 @@ public class RemoteDesktop : IPlugin, IPluginI18n
         };
     }
 
-    private RegistryKey? OpenRegistryKey(string keyPath)
-    {
-        try
-        {
-            return Registry.CurrentUser.OpenSubKey(keyPath, true);
-        }
-        catch (Exception e)
-        {
-            _logger?.LogError($"Failed to open registry key {keyPath}", e);
-        }
-
-        return null;
-    }
-
     private string? GetDefaultUser(string ipOrHostname)
     {
-        if (Settings.UserOverride == null)
-        {
-            return Settings.DefaultUser;
-        }
-
-        foreach ((Regex regex, string user) in Settings.UserOverride)
-        {
-            if (regex.IsMatch(ipOrHostname))
-            {
-                return user;
-            }
-        }
-
-        return Settings.DefaultUser;
-    }
-
-    private class ContextLogger<T>(PluginInitContext context)
-    {
-        private static readonly string s_className = typeof(T).Name;
-        private readonly PluginInitContext _context = context;
-
-        public void LogDebug(string message, [CallerMemberName] string methodName = "")
-        {
-            _context.API.LogDebug(s_className, message, methodName);
-        }
-
-        public void LogInfo(string message, [CallerMemberName] string methodName = "")
-        {
-            _context.API.LogInfo(s_className, message, methodName);
-        }
-
-        public void LogWarn(string message, [CallerMemberName] string methodName = "")
-        {
-            _context.API.LogWarn(s_className, message, methodName);
-        }
-
-        public void LogError(string message, Exception exception, [CallerMemberName] string methodName = "")
-        {
-            _context.API.LogException(s_className, message, exception, methodName);
-        }
+        return RegistryManager.TryGetUserHint(ipOrHostname, out string? usernameHint)
+            ? usernameHint
+            : UsernameSelector.GetUsername(ipOrHostname);
     }
 
     private class ScoredConnection
