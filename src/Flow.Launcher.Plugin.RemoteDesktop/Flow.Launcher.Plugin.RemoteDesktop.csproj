@@ -1,18 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <_PLUGIN_NAME>Flow.Launcher.Plugin.RemoteDesktop</_PLUGIN_NAME>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <TargetFramework>net7.0-windows</TargetFramework>
         <LangVersion>latest</LangVersion>
-        <AssemblyName>Flow.Launcher.Plugin.RemoteDesktop</AssemblyName>
-        <PackageId>Flow.Launcher.Plugin.RemoteDesktop</PackageId>
+        <PackageId>$(_PLUGIN_NAME)</PackageId>
         <Authors>XDFUN</Authors>
-        <PackageProjectUrl>https://github.com/XDFUN/Flow.Launcher.Plugin.RemoteDesktop</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/XDFUN/Flow.Launcher.Plugin.RemoteDesktop</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/XDFUN/$(_PLUGIN_NAME)</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/XDFUN/$(_PLUGIN_NAME)</RepositoryUrl>
         <PackageTags>flow-launcher flow-plugin</PackageTags>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <Nullable>enable</Nullable>
+        <UseWpf>true</UseWpf>
+        <RootNamespace>$(_PLUGIN_NAME)</RootNamespace>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -27,13 +32,50 @@
         <Content Include="../plugin.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-        <Content Include="Languages/*.xaml">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Flow.Launcher.Plugin" Version="4.4.0"/>
+        <ProjectReference Include="..\$(_PLUGIN_NAME).Core\$(_PLUGIN_NAME).Core.csproj"/>
+        <ProjectReference Include="..\$(_PLUGIN_NAME).Wpf\$(_PLUGIN_NAME).Wpf.csproj"/>
     </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.44.2">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Resources\Localization.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Localization.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\Localization.de.resx">
+        <DependentUpon>Localization.resx</DependentUpon>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <Target Name="ILRepacker" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+        <ItemGroup>
+            <_InputAssemblies Include="$(OutputPath)\$(_PLUGIN_NAME).dll"/>
+            <_InputAssemblies Include="$(OutputPath)\$(_PLUGIN_NAME).Core.dll"/>
+            <_InputAssemblies Include="$(OutputPath)\$(_PLUGIN_NAME).Wpf.dll"/>
+        </ItemGroup>
+
+        <ILRepack Parallel="true"
+                  Internalize="true"
+                  InputAssemblies="@(_InputAssemblies)"
+                  TargetKind="Dll"
+                  OutputFile="$(OutputPath)\$(AssemblyName).dll"/>
+
+        <ItemGroup>
+            <_DeleteFiles Include="$(OutputPath)\$(_PLUGIN_NAME).Core.*"/>
+            <_DeleteFiles Include="$(OutputPath)\$(_PLUGIN_NAME).Wpf.*"/>
+            <_DeleteFiles Include="$(OutputPath)\ILRepack*" />
+        </ItemGroup>
+
+        <Delete Files="@(_DeleteFiles)"/>
+    </Target>
 
 </Project>

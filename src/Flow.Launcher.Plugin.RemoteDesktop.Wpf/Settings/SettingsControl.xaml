@@ -1,0 +1,84 @@
+﻿<UserControl x:Class="Flow.Launcher.Plugin.RemoteDesktop.Settings.SettingsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:behaviors="clr-namespace:Flow.Launcher.Plugin.RemoteDesktop.Behaviors"
+             xmlns:settings="clr-namespace:Flow.Launcher.Plugin.RemoteDesktop.Settings"
+             xmlns:dd="urn:gong-wpf-dragdrop"
+             mc:Ignorable="d"
+             d:DesignHeight="350"
+             d:DesignWidth="300"
+             d:DataContext="{d:DesignInstance Type=settings:SettingsViewModel+Design, IsDesignTimeCreatable=True}">
+    <UserControl.Resources>
+        <settings:LocalizationManager x:Key="Localization" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBox Grid.Row="0"
+                 Text="{Binding DefaultUser, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 behaviors:TextBoxBehavior.Placeholder="{Binding UserExample, Source={StaticResource Localization}}" />
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding UserOverrides}"
+                  AutoGenerateColumns="False"
+                  CanUserReorderColumns="False"
+                  CanUserSortColumns="False"
+                  CanUserResizeColumns="False"
+                  CanUserResizeRows="False"
+                  CanUserAddRows="True"
+                  CanUserDeleteRows="True"
+                  ColumnWidth="*"
+                  HeadersVisibility="Column"
+                  SelectionMode="Extended"
+                  behaviors:DataGridSelectedItemsBehavior.BindableSelectedItems="{Binding SelectedOverrides}"
+                  dd:DragDrop.IsDragSource="True"
+                  dd:DragDrop.IsDropTarget="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="{Binding RegexHeader, Source={StaticResource Localization}}"
+                                    Width="*"
+                                    Binding="{Binding Regex, Mode=TwoWay}">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="behaviors:TextBlockBehavior.Placeholder"
+                                    Value="{Binding RegexExample, Source={StaticResource Localization}}" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="{Binding UserHeader, Source={StaticResource Localization}}"
+                                    Width="*"
+                                    Binding="{Binding User, Mode=TwoWay}">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="behaviors:TextBlockBehavior.Placeholder"
+                                    Value="{Binding UserExample, Source={StaticResource Localization}}" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Grid Grid.Row="2" Margin="14,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0"
+                    Margin="10"
+                    Content="{Binding Add, Source={StaticResource Localization}}"
+                    Command="{Binding AddOverrideCommand}" />
+            <Button Grid.Column="1"
+                    Margin="10"
+                    Content="{Binding Delete, Source={StaticResource Localization}}"
+                    Command="{Binding DeleteOverridesCommand}" />
+        </Grid>
+        <Button Grid.Row="3"
+                Margin="14 5"
+                Content="{Binding Save, Source={StaticResource Localization}}"
+                Command="{Binding SaveCommand}" />
+    </Grid>
+</UserControl>

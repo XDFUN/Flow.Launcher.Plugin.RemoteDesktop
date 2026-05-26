@@ -42,6 +42,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{5458
 		..\scripts\install.ps1 = ..\scripts\install.ps1
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flow.Launcher.Plugin.RemoteDesktop.Core", "Flow.Launcher.Plugin.RemoteDesktop.Core\Flow.Launcher.Plugin.RemoteDesktop.Core.csproj", "{3CD37020-DAFC-493F-B054-76D9AB333671}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flow.Launcher.Plugin.RemoteDesktop.Wpf", "Flow.Launcher.Plugin.RemoteDesktop.Wpf\Flow.Launcher.Plugin.RemoteDesktop.Wpf.csproj", "{2C9A94C9-48D2-44FD-97EA-12A9307A05BD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -52,6 +56,14 @@ Global
 		{2171B381-EFCF-4A4B-86F7-01D07BBD6AAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2171B381-EFCF-4A4B-86F7-01D07BBD6AAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2171B381-EFCF-4A4B-86F7-01D07BBD6AAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CD37020-DAFC-493F-B054-76D9AB333671}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CD37020-DAFC-493F-B054-76D9AB333671}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CD37020-DAFC-493F-B054-76D9AB333671}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CD37020-DAFC-493F-B054-76D9AB333671}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C9A94C9-48D2-44FD-97EA-12A9307A05BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C9A94C9-48D2-44FD-97EA-12A9307A05BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C9A94C9-48D2-44FD-97EA-12A9307A05BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C9A94C9-48D2-44FD-97EA-12A9307A05BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{EB26A314-CC95-43B0-BD4F-3BD35FEB9282} = {663D0819-EFB3-4095-B282-11537DE0DBC4}

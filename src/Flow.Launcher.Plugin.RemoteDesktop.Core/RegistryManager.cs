@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using Flow.Launcher.Plugin.RemoteDesktop.Logging;
 using Microsoft.Win32;
 
 namespace Flow.Launcher.Plugin.RemoteDesktop;
 
-internal class RegistryManager(PluginInitContext context)
+public class RegistryManager(PluginInitContext context)
 {
     private const string SERVER_KEY = @"Software\Microsoft\Terminal Server Client\Servers";
     private const string USERNAME_HINT_KEY = "UsernameHint";
@@ -34,31 +33,6 @@ internal class RegistryManager(PluginInitContext context)
         {
             serverKey.SetValue(USERNAME_HINT_KEY, username);
         }
-    }
-
-    public bool TryGetUserHint(string ipOrHostname, [NotNullWhen(true)] out string? usernameHint)
-    {
-        usernameHint = null;
-
-        if (!TryOpenServerKey(out RegistryKey? historyKey))
-        {
-            return false;
-        }
-
-        using RegistryKey _ = historyKey;
-
-        RegistryKey? serverKey = historyKey.OpenSubKey(ipOrHostname);
-
-        if (serverKey == null)
-        {
-            _logger.LogDebug($"Server hint does not exist for {ipOrHostname}");
-
-            return false;
-        }
-
-        usernameHint = serverKey.GetValue(USERNAME_HINT_KEY)?.ToString();
-
-        return usernameHint != null;
     }
 
     public string[] GetConnectionHistory()
@@ -111,18 +85,29 @@ internal class RegistryManager(PluginInitContext context)
         return result;
     }
 
-    private bool TryOpenServerKey([NotNullWhen(true)] out RegistryKey? historyKey)
+    public bool TryGetUserHint(string ipOrHostname, [NotNullWhen(true)] out string? usernameHint)
     {
-        historyKey = OpenRegistryKey(SERVER_KEY);
+        usernameHint = null;
 
-        if (historyKey != null)
+        if (!TryOpenServerKey(out RegistryKey? historyKey))
         {
-            return true;
+            return false;
         }
 
-        _logger.LogDebug("Failed to open registry key for recent connections");
+        using RegistryKey _ = historyKey;
 
-        return false;
+        RegistryKey? serverKey = historyKey.OpenSubKey(ipOrHostname);
+
+        if (serverKey == null)
+        {
+            _logger.LogDebug($"Server hint does not exist for {ipOrHostname}");
+
+            return false;
+        }
+
+        usernameHint = serverKey.GetValue(USERNAME_HINT_KEY)?.ToString();
+
+        return usernameHint != null;
     }
 
     private RegistryKey? OpenRegistryKey(string keyPath)
@@ -137,5 +122,19 @@ internal class RegistryManager(PluginInitContext context)
         }
 
         return null;
+    }
+
+    private bool TryOpenServerKey([NotNullWhen(true)] out RegistryKey? historyKey)
+    {
+        historyKey = OpenRegistryKey(SERVER_KEY);
+
+        if (historyKey != null)
+        {
+            return true;
+        }
+
+        _logger.LogDebug("Failed to open registry key for recent connections");
+
+        return false;
     }
 }

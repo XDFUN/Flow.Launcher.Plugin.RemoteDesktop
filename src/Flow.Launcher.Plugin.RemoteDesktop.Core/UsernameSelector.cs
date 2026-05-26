@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
+using Flow.Launcher.Plugin.RemoteDesktop.Logging;
 using Flow.Launcher.Plugin.RemoteDesktop.Settings;
 
 namespace Flow.Launcher.Plugin.RemoteDesktop;
 
-internal class UsernameSelector(PluginInitContext context, RemoteDesktopSettings settings)
+public class UsernameSelector(PluginInitContext context, RemoteDesktopSettings settings)
 {
     private readonly ContextLogger<UsernameSelector> _logger = new(context);
     private readonly RemoteDesktopSettings _settings = settings;
@@ -14,14 +13,14 @@ internal class UsernameSelector(PluginInitContext context, RemoteDesktopSettings
 
     public string? GetUsername(string ipOrHostname)
     {
-        if (_settings.UserOverride == null)
+        if (_settings.UserOverrides == null)
         {
             _logger.LogDebug("No user overrides configured");
 
             return _settings.DefaultUser;
         }
 
-        CachePatterns(_settings.UserOverride);
+        CachePatterns(_settings.UserOverrides);
 
         foreach ((Regex regex, string user) in _userOverride)
         {
@@ -48,8 +47,8 @@ internal class UsernameSelector(PluginInitContext context, RemoteDesktopSettings
         }
 
         Dictionary<Regex, string> overrides = userOverrides.ToDictionary(
-            pair => new Regex(pair.Key),
-            pair => pair.Value
+            keySelector: pair => new Regex(pair.Key),
+            elementSelector: pair => pair.Value
         );
 
         _cachedPatterns = new HashSet<string>(userOverrides.Keys);

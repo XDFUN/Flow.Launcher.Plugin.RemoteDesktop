@@ -1,32 +1,39 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Windows.Controls;
+using Flow.Launcher.Plugin.RemoteDesktop.Logging;
+using Flow.Launcher.Plugin.RemoteDesktop.Resources;
 using Flow.Launcher.Plugin.RemoteDesktop.Settings;
 using Flow.Launcher.Plugin.SharedModels;
+
+using Localization = Flow.Launcher.Plugin.RemoteDesktop.Resources.Localization;
 
 namespace Flow.Launcher.Plugin.RemoteDesktop;
 
 /// <summary>
 ///     A plugin for Flow.Launcher to open RDP connections.
 /// </summary>
-public class RemoteDesktop : IPlugin, IPluginI18n
+public class RemoteDesktop : IPlugin, IPluginI18n, ISettingProvider
 {
     private const string ICO_PATH = "Images/icon.png";
 
-    private PluginInitContext? _context;
     private ContextLogger<RemoteDesktop>? _logger;
+    private readonly Lazy<SettingsControl> _settingsControl;
 
-    private RemoteDesktopSettings Settings
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+    public RemoteDesktop()
     {
-        get => field ?? throw new InvalidOperationException("Settings not initialized");
-        set;
+        _settingsControl = new Lazy<SettingsControl>(CreateSettingsControl);
     }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
-    private Localization Localization
+    private PluginInitContext Context
     {
-        get => field ?? throw new InvalidOperationException("Localization not initialized");
+        get => field ?? throw new InvalidOperationException("Context not initialized");
         set;
     }
 
@@ -36,41 +43,36 @@ public class RemoteDesktop : IPlugin, IPluginI18n
         set;
     }
 
+    private RemoteDesktopSettings Settings
+    {
+        get => field ?? throw new InvalidOperationException("Settings not initialized");
+        set;
+    }
+
     private UsernameSelector UsernameSelector
     {
         get => field ?? throw new InvalidOperationException("UsernameSelector not initialized");
         set;
     }
 
-    /// <summary>
-    ///     Initializes the plugin.
-    /// </summary>
-    /// <param name="context"></param>
+    /// <inheritdoc />
     public void Init(PluginInitContext context)
     {
-        _context = context;
+        Context = context;
         _logger = new ContextLogger<RemoteDesktop>(context);
-        Localization = new Localization(context.API);
-        Settings = _context.API.LoadSettingJsonStorage<RemoteDesktopSettings>();
+        Settings = Context.API.LoadSettingJsonStorage<RemoteDesktopSettings>();
         RegistryManager = new RegistryManager(context);
         UsernameSelector = new UsernameSelector(context, Settings);
     }
 
-    /// <summary>
-    ///     Queries the user registry for key Software\Microsoft\Terminal Server Client\Servers
-    /// </summary>
+    /// <inheritdoc />
     public List<Result> Query(Query? query)
     {
-        if (_context == null)
-        {
-            return [];
-        }
-
         if (!File.Exists(Settings.MstscPath))
         {
             _logger?.LogWarn("mstsc.exe not found");
 
-            _context.API.ShowMsgError(
+            Context.API.ShowMsgError(
                 "mstsc.exe not found",
                 "Please ensure that mstsc.exe is installed and located at " + Settings.MstscPath
             );
@@ -89,31 +91,101 @@ public class RemoteDesktop : IPlugin, IPluginI18n
         return results.Select(GetResult).ToList();
     }
 
-    /// <summary>
-    ///     Retrieves the translated title of the plugin.
-    /// </summary>
-    /// <returns>The localized plugin title.</returns>
+    /// <inheritdoc />
+    public void OnCultureInfoChanged(CultureInfo newCulture)
+    {
+        Localization.Culture = newCulture;
+        GuiCultureProvider.ChangeCulture(newCulture);
+    }
+
+    /// <inheritdoc />
     public string GetTranslatedPluginTitle()
     {
         return Localization.PluginName;
     }
 
-    /// <summary>
-    ///     Retrieves the translated description of the plugin.
-    /// </summary>
-    /// <returns>The localized plugin description.</returns>
+    /// <inheritdoc />
     public string GetTranslatedPluginDescription()
     {
         return Localization.PluginDescription;
     }
 
-    private void QueryCore(string search, List<string> results)
+    /// <inheritdoc />
+    public Control CreateSettingPanel()
     {
-        if (_context == null)
+        return _settingsControl.Value;
+    }
+
+    private SettingsControl CreateSettingsControl()
+    {
+        _logger?.LogDebug("Creating settings panel");
+
+        var vm = new SettingsViewModel(Settings);
+
+        vm.Save += (_, args) =>
         {
-            return;
+            Settings.DefaultUser = args.Settings.DefaultUser;
+            Settings.UserOverrides = args.Settings.UserOverrides;
+
+            Context.API.SaveSettingJsonStorage<RemoteDesktopSettings>();
+        };
+
+        return new SettingsControl
+        {
+            DataContext = vm,
+        };
+    }
+
+    private string? GetDefaultUser(string ipOrHostname)
+    {
+        return RegistryManager.TryGetUserHint(ipOrHostname, out string? usernameHint)
+            ? usernameHint
+            : UsernameSelector.GetUsername(ipOrHostname);
+    }
+
+    private Result GetResult(string ipOrHostname)
+    {
+        string? user = GetDefaultUser(ipOrHostname);
+        string title = ipOrHostname;
+
+        if (!string.IsNullOrWhiteSpace(user))
+        {
+            title += $" ({user})";
         }
 
+        return new Result
+        {
+            Title = title,
+            AutoCompleteText = ipOrHostname,
+            SubTitle = Localization.ResultSubtitle,
+            IcoPath = ICO_PATH,
+            Action = _ =>
+            {
+                _logger?.LogDebug($"Opening connection to {ipOrHostname}");
+                RegistryManager.CreateServerHint(ipOrHostname, user);
+
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = Settings.MstscPath,
+                    Arguments = $"/v:{ipOrHostname}",
+                    UseShellExecute = true,
+                    CreateNoWindow = true,
+                };
+
+                var rdcProcess = new Process
+                {
+                    StartInfo = processInfo,
+                };
+
+                rdcProcess.Start();
+
+                return true;
+            },
+        };
+    }
+
+    private void QueryCore(string search, List<string> results)
+    {
         if (string.IsNullOrWhiteSpace(search))
         {
             _logger?.LogDebug("Query executed with empty search term");
@@ -163,17 +235,12 @@ public class RemoteDesktop : IPlugin, IPluginI18n
         Dictionary<string, double> recents
     )
     {
-        if (_context == null)
-        {
-            return [];
-        }
-
         var scoredConnections = new List<ScoredConnection>();
         int totalRecents = recents.Count;
 
         foreach (string connection in connectionHistory)
         {
-            MatchResult? match = _context.API.FuzzySearch(search, connection);
+            MatchResult? match = Context.API.FuzzySearch(search, connection);
 
             if (!match.Success)
             {
@@ -211,7 +278,7 @@ public class RemoteDesktop : IPlugin, IPluginI18n
         if (!string.IsNullOrWhiteSpace(search))
         {
             return RegistryManager.GetRecentConnection()
-                                  .Where(x => _context?.API.FuzzySearch(search, x.Key).Success ?? true)
+                                  .Where(x => Context.API.FuzzySearch(search, x.Key).Success)
                                   .OrderBy(x => x.Value)
                                   .Select(x => x.Key)
                                   .ToList();
@@ -220,54 +287,6 @@ public class RemoteDesktop : IPlugin, IPluginI18n
         _logger?.LogDebug("Query executed with empty search term");
 
         return RegistryManager.GetRecentConnection().OrderBy(x => x.Value).Select(x => x.Key).ToList();
-    }
-
-    private Result GetResult(string ipOrHostname)
-    {
-        string? user = GetDefaultUser(ipOrHostname);
-        string title = ipOrHostname;
-
-        if (!string.IsNullOrWhiteSpace(user))
-        {
-            title += $" ({user})";
-        }
-
-        return new Result
-        {
-            Title = title,
-            AutoCompleteText = ipOrHostname,
-            SubTitle = Localization.ResultSubtitle,
-            IcoPath = ICO_PATH,
-            Action = _ =>
-            {
-                _logger?.LogDebug($"Opening connection to {ipOrHostname}");
-                RegistryManager.CreateServerHint(ipOrHostname, user);
-
-                var processInfo = new ProcessStartInfo
-                {
-                    FileName = Settings.MstscPath,
-                    Arguments = $"/v:{ipOrHostname}",
-                    UseShellExecute = true,
-                    CreateNoWindow = true,
-                };
-
-                var rdcProcess = new Process
-                {
-                    StartInfo = processInfo,
-                };
-
-                rdcProcess.Start();
-
-                return true;
-            },
-        };
-    }
-
-    private string? GetDefaultUser(string ipOrHostname)
-    {
-        return RegistryManager.TryGetUserHint(ipOrHostname, out string? usernameHint)
-            ? usernameHint
-            : UsernameSelector.GetUsername(ipOrHostname);
     }
 
     private class ScoredConnection
