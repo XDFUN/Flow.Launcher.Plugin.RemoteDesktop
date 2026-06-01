@@ -27,10 +27,10 @@
     <data name="UserHeader" xml:space="preserve">
         <value>User</value>
     </data>
-    <data name="Add" xml:space="preserve">
+    <data name="AddOverride" xml:space="preserve">
         <value>Add</value>
     </data>
-    <data name="Delete" xml:space="preserve">
+    <data name="DeleteOverride" xml:space="preserve">
         <value>Delete</value>
     </data>
     <data name="Save" xml:space="preserve">
@@ -38,5 +38,29 @@
     </data>
     <data name="UserExample" xml:space="preserve">
         <value>Enter User...</value>
+    </data>
+    <data name="UserOverrideDialogTitle" xml:space="preserve">
+        <value>User Override</value>
+    </data>
+    <data name="UserOverrideDialogGuide" xml:space="preserve">
+        <value>If you want to override the user for a new connection, first enter the regex to match the host name or ip address. Once that is done you can specify which user to use. If you leave the user field empty, the current system user is used.</value>
+    </data>
+    <data name="RegexFieldLabel" xml:space="preserve">
+        <value>Host Pattern*</value>
+    </data>
+    <data name="UserFieldLabel" xml:space="preserve">
+        <value>User</value>
+    </data>
+    <data name="EditOverride" xml:space="preserve">
+        <value>Edit</value>
+    </data>
+    <data name="SystemUserHint" xml:space="preserve">
+        <value>System User</value>
+    </data>
+    <data name="DefaultUserFieldLabel" xml:space="preserve">
+        <value>Default User</value>
+    </data>
+    <data name="DefaultUserHint" xml:space="preserve">
+        <value>Use Default User</value>
     </data>
 </root>

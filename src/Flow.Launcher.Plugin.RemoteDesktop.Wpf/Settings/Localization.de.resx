@@ -20,10 +20,10 @@
     <data name="UserHeader" xml:space="preserve">
         <value>Nutzer</value>
     </data>
-    <data name="Add" xml:space="preserve">
+    <data name="AddOverride" xml:space="preserve">
         <value>Hinzufügen</value>
     </data>
-    <data name="Delete" xml:space="preserve">
+    <data name="DeleteOverride" xml:space="preserve">
         <value>Entfernen</value>
     </data>
     <data name="Save" xml:space="preserve">
@@ -31,5 +31,29 @@
     </data>
     <data name="UserExample" xml:space="preserve">
         <value>Nutzer eingeben...</value>
+    </data>
+    <data name="UserOverrideDialogTitle" xml:space="preserve">
+        <value>Benutzerüberschreibung</value>
+    </data>
+    <data name="UserOverrideDialogGuide" xml:space="preserve">
+        <value>Wenn du den Benutzer für eine neue Verbindung überschreiben möchtest, gebe zunächst den regulären Ausdruck ein, welcher den Nutzer dem Hostnamen oder der IP-Adresse zuweißt. Anschließend kann der Benutzer angegeben werden. Wenn kein Nutzer hinterlegt ist, wird der aktuelle Systembenutzer verwendet.</value>
+    </data>
+    <data name="RegexFieldLabel" xml:space="preserve">
+        <value>Host-Muster*</value>
+    </data>
+    <data name="UserFieldLabel" xml:space="preserve">
+        <value>Nutzer</value>
+    </data>
+    <data name="EditOverride" xml:space="preserve">
+        <value>Editieren</value>
+    </data>
+    <data name="SystemUserHint" xml:space="preserve">
+        <value>Systembenutzer</value>
+    </data>
+    <data name="DefaultUserFieldLabel" xml:space="preserve">
+        <value>Standardbenutzer</value>
+    </data>
+    <data name="DefaultUserHint" xml:space="preserve">
+        <value>Benutze Standardbenutzer</value>
     </data>
 </root>

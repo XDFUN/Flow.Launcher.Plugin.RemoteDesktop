@@ -37,7 +37,9 @@ public class TextBoxBehavior
             return false;
         }
 
-        adorner = layer.GetAdorners(textBoxControl)?.OfType<PlaceholderAdorner>().FirstOrDefault();
+        adorner = layer.GetAdorners(textBoxControl)
+                       ?.OfType<PlaceholderAdorner>()
+                       .FirstOrDefault(x => x.AdornedElement == textBoxControl);
 
         if (adorner != null)
         {
@@ -46,6 +48,8 @@ public class TextBoxBehavior
 
         adorner = new PlaceholderAdorner(textBoxControl);
         layer.Add(adorner);
+
+        UpdateAdornerVisibility(textBoxControl, adorner);
 
         return true;
     }
@@ -85,16 +89,27 @@ public class TextBoxBehavior
 
     private static void TextBoxControl_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (sender is not TextBox textBoxControl || !GetOrCreateAdorner(textBoxControl, out PlaceholderAdorner? adorner))
+        if (sender is not TextBox textBoxControl
+            || !GetOrCreateAdorner(textBoxControl, out PlaceholderAdorner? adorner))
         {
             return;
         }
 
+        UpdateAdornerVisibility(textBoxControl, adorner);
+    }
+
+    private static void UpdateAdornerVisibility(TextBox textBoxControl, PlaceholderAdorner adorner)
+    {
         adorner.Visibility = textBoxControl.Text.Length > 0 ? Visibility.Hidden : Visibility.Visible;
     }
 
-    private class PlaceholderAdorner(TextBox textBox) : Adorner(textBox)
+    private class PlaceholderAdorner : Adorner
     {
+        public PlaceholderAdorner(TextBox textBox) : base(textBox)
+        {
+            IsHitTestVisible = false;
+        }
+
         protected override void OnRender(DrawingContext drawingContext)
         {
             var textBoxControl = (TextBox)AdornedElement;

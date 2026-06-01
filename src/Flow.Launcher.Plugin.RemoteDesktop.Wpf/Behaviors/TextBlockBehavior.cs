@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -50,6 +52,8 @@ public class TextBlockBehavior
 
         adorner = new PlaceholderAdorner(textBlockControl);
         layer.Add(adorner);
+        
+        UpdateAdornerVisibility(textBlockControl, adorner);
 
         return true;
     }
@@ -105,7 +109,12 @@ public class TextBlockBehavior
             return;
         }
 
-        adorner.Visibility = string.IsNullOrEmpty(textBlockControl.Text) ? Visibility.Visible : Visibility.Hidden;
+        UpdateAdornerVisibility(textBlockControl, adorner);
+    }
+
+    private static void UpdateAdornerVisibility(TextBlock textBlockControl, PlaceholderAdorner adorner)
+    {
+        adorner.Visibility = textBlockControl.Text.Length > 0 ? Visibility.Hidden : Visibility.Visible;
     }
 
     private class PlaceholderAdorner(TextBlock textBlock) : Adorner(textBlock)
@@ -148,7 +157,7 @@ public class TextBlockBehavior
                 TextAlignment = textBlockControl.TextAlignment,
                 Trimming = textBlockControl.TextTrimming,
             };
-
+            
             var renderingOffset = new Point(textBlockControl.Padding.Left, textBlockControl.Padding.Top);
 
             drawingContext.DrawText(text, renderingOffset);

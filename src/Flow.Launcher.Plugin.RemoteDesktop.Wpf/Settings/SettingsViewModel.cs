@@ -5,13 +5,17 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Flow.Launcher.Plugin.RemoteDesktop.Events;
+using Flow.Launcher.Plugin.RemoteDesktop.Services;
 
 namespace Flow.Launcher.Plugin.RemoteDesktop.Settings;
 
-public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
+public class SettingsViewModel : INotifyPropertyChanged
 {
-    public SettingsViewModel(RemoteDesktopSettings settings)
+    private readonly IDialogService _dialogService;
+
+    public SettingsViewModel(RemoteDesktopSettings settings, IDialogService dialogService)
     {
+        _dialogService = dialogService;
         DefaultUser = settings.DefaultUser ?? string.Empty;
         UserOverrides = [];
 
@@ -29,6 +33,7 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
 #if DEBUG
     private SettingsViewModel(string defaultUser, ObservableCollection<UserOverrideViewModel> userOverrides)
     {
+        _dialogService = new DialogService();
         DefaultUser = defaultUser;
         UserOverrides = userOverrides;
 
@@ -38,17 +43,21 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
 
     public ICommand AddOverrideCommand { get; set; }
 
+    public ICommand EditOverrideCommand { get; set; }
+
     public string DefaultUser
     {
         get;
         set
         {
-            if (field != value)
+            bool hasChanged = field != value;
+
+            field = value;
+
+            if (hasChanged)
             {
                 OnPropertyChanged();
             }
-
-            field = value;
         }
     }
 
@@ -61,26 +70,20 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
     public ObservableCollection<UserOverrideViewModel> UserOverrides { get; }
 
     /// <inheritdoc />
-    public IEnumerable GetErrors(string? propertyName)
-    {
-        return Array.Empty<string>();
-    }
-
-    /// <inheritdoc />
-    public bool HasErrors { get; private set; }
-
-    /// <inheritdoc />
-    public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
-
-    /// <inheritdoc />
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public event SettingsSaveEventHandler? Save;
 
-    [MemberNotNull(nameof(AddOverrideCommand), nameof(DeleteOverridesCommand), nameof(SaveCommand))]
+    [MemberNotNull(
+        nameof(AddOverrideCommand),
+        nameof(EditOverrideCommand),
+        nameof(DeleteOverridesCommand),
+        nameof(SaveCommand)
+    )]
     private void InitCommands()
     {
         AddOverrideCommand = new AddOverrideCommandImpl(this);
+        EditOverrideCommand = new EditOverrideCommandImpl(this);
         DeleteOverridesCommand = new DeleteOverridesCommandImpl(this);
         SaveCommand = new SaveCommandImpl(this);
     }
@@ -112,7 +115,48 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
 
         public void Execute(object? parameter)
         {
-            _viewModel.UserOverrides.Add(new UserOverrideViewModel(string.Empty, string.Empty));
+            var item = new UserOverrideViewModel(string.Empty, string.Empty);
+
+            if (_viewModel._dialogService.Show(item))
+            {
+                _viewModel.UserOverrides.Add(item);
+            }
+        }
+
+        public event EventHandler? CanExecuteChanged;
+    }
+
+    private class EditOverrideCommandImpl : ICommand
+    {
+        private readonly SettingsViewModel _viewModel;
+
+        public EditOverrideCommandImpl(SettingsViewModel viewModel)
+        {
+            _viewModel = viewModel;
+
+            _viewModel.SelectedOverrides.CollectionChanged += (_, _) =>
+            {
+                CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+            };
+        }
+
+        public bool CanExecute(object? parameter)
+        {
+            return _viewModel.SelectedOverrides.Count == 1;
+        }
+
+        public void Execute(object? parameter)
+        {
+            UserOverrideViewModel item = _viewModel.SelectedOverrides.First();
+            var vm = new UserOverrideViewModel(item.Regex, item.User);
+
+            if (!_viewModel._dialogService.Show(vm))
+            {
+                return;
+            }
+
+            item.Regex = vm.Regex;
+            item.User = vm.User;
         }
 
         public event EventHandler? CanExecuteChanged;
@@ -159,15 +203,35 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
         {
             _viewModel = viewModel;
 
-            _viewModel.PropertyChanged += (_, _) =>
+            _viewModel.PropertyChanged += MarkChanged;
+
+            _viewModel.SelectedOverrides.CollectionChanged += (_, args) =>
             {
+                IList empty = new List<object>();
+
+                foreach (object oldItem in args.OldItems ?? empty)
+                {
+                    if (oldItem is UserOverrideViewModel userOverride)
+                    {
+                        userOverride.PropertyChanged -= MarkChanged;
+                    }
+                }
+
+                foreach (object newItem in args.NewItems ?? empty)
+                {
+                    if (newItem is UserOverrideViewModel userOverride)
+                    {
+                        userOverride.PropertyChanged += MarkChanged;
+                    }
+                }
+
                 MarkChanged();
             };
 
-            _viewModel.SelectedOverrides.CollectionChanged += (_, _) =>
+            foreach (UserOverrideViewModel userOverride in _viewModel.UserOverrides)
             {
-                MarkChanged();
-            };
+                userOverride.PropertyChanged += MarkChanged;
+            }
         }
 
         public bool CanExecute(object? parameter)
@@ -178,13 +242,24 @@ public class SettingsViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
         public void Execute(object? parameter)
         {
             _viewModel.OnSave();
+            SetCanExecute(false);
         }
 
         public event EventHandler? CanExecuteChanged;
 
-        private void MarkChanged()
+        private void MarkChanged(object? sender = null, object? args = null)
         {
-            _canExecute = true;
+            SetCanExecute(true);
+        }
+
+        private void SetCanExecute(bool value)
+        {
+            if (_canExecute == value)
+            {
+                return;
+            }
+
+            _canExecute = value;
             CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
     }

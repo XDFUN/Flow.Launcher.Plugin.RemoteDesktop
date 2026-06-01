@@ -20,19 +20,35 @@ internal class LocalizationManager : INotifyPropertyChanged, IDisposable
         GuiCultureProvider.CultureChanged -= OnCultureChanged;
     }
 
-    public string Add => Localization.Add;
+    public string AddOverride => Localization.AddOverride;
 
-    public string Delete => Localization.Delete;
+    public string DefaultUserFieldLabel => Localization.DefaultUserFieldLabel;
+
+    public string DefaultUserHint => Localization.DefaultUserHint;
+
+    public string DeleteOverride => Localization.DeleteOverride;
+
+    public string EditOverride => Localization.EditOverride;
 
     public string RegexExample => Localization.RegexExample;
+
+    public string RegexFieldLabel => Localization.RegexFieldLabel;
 
     public string RegexHeader => Localization.RegexHeader;
 
     public string Save => Localization.Save;
 
+    public string SystemUserHint => Localization.SystemUserHint;
+
     public string UserExample => Localization.UserExample;
 
+    public string UserFieldLabel => Localization.UserFieldLabel;
+
     public string UserHeader => Localization.UserHeader;
+
+    public string UserOverrideDialogGuide => Localization.UserOverrideDialogGuide;
+
+    public string UserOverrideDialogTitle => Localization.UserOverrideDialogTitle;
 
     public void Dispose()
     {

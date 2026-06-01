@@ -4,12 +4,12 @@ using System.Windows.Controls;
 
 namespace Flow.Launcher.Plugin.RemoteDesktop.Behaviors;
 
-internal static class DataGridSelectedItemsBehavior
+internal static class ListViewSelectedItemsBehavior
 {
     public static readonly DependencyProperty BindableSelectedItemsProperty = DependencyProperty.RegisterAttached(
         "BindableSelectedItems",
         typeof(IList),
-        typeof(DataGridSelectedItemsBehavior),
+        typeof(ListViewSelectedItemsBehavior),
         new PropertyMetadata(null, OnBindableSelectedItemsChanged)
     );
 
@@ -25,8 +25,8 @@ internal static class DataGridSelectedItemsBehavior
 
     private static void Grid_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        var grid = (DataGrid)sender;
-        IList? selectedItems = GetBindableSelectedItems(grid);
+        var view = (ListView)sender;
+        IList? selectedItems = GetBindableSelectedItems(view);
 
         if (selectedItems == null)
         {
@@ -35,7 +35,7 @@ internal static class DataGridSelectedItemsBehavior
 
         selectedItems.Clear();
 
-        foreach (object? item in grid.SelectedItems)
+        foreach (object? item in view.SelectedItems)
         {
             selectedItems.Add(item);
         }
@@ -43,12 +43,12 @@ internal static class DataGridSelectedItemsBehavior
 
     private static void OnBindableSelectedItemsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is not DataGrid grid)
+        if (d is not ListView view)
         {
             return;
         }
 
-        grid.SelectionChanged -= Grid_SelectionChanged;
-        grid.SelectionChanged += Grid_SelectionChanged;
+        view.SelectionChanged -= Grid_SelectionChanged;
+        view.SelectionChanged += Grid_SelectionChanged;
     }
 }

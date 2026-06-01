@@ -62,18 +62,45 @@ namespace Flow.Launcher.Plugin.RemoteDesktop.Settings {
         /// <summary>
         ///   Looks up a localized string similar to Add.
         /// </summary>
-        public static string Add {
+        public static string AddOverride {
             get {
-                return ResourceManager.GetString("Add", resourceCulture);
+                return ResourceManager.GetString("AddOverride", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Default User.
+        /// </summary>
+        public static string DefaultUserFieldLabel {
+            get {
+                return ResourceManager.GetString("DefaultUserFieldLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use Default User.
+        /// </summary>
+        public static string DefaultUserHint {
+            get {
+                return ResourceManager.GetString("DefaultUserHint", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
-        public static string Delete {
+        public static string DeleteOverride {
             get {
-                return ResourceManager.GetString("Delete", resourceCulture);
+                return ResourceManager.GetString("DeleteOverride", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit.
+        /// </summary>
+        public static string EditOverride {
+            get {
+                return ResourceManager.GetString("EditOverride", resourceCulture);
             }
         }
         
@@ -83,6 +110,15 @@ namespace Flow.Launcher.Plugin.RemoteDesktop.Settings {
         public static string RegexExample {
             get {
                 return ResourceManager.GetString("RegexExample", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Host Pattern*.
+        /// </summary>
+        public static string RegexFieldLabel {
+            get {
+                return ResourceManager.GetString("RegexFieldLabel", resourceCulture);
             }
         }
         
@@ -105,6 +141,15 @@ namespace Flow.Launcher.Plugin.RemoteDesktop.Settings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to System User.
+        /// </summary>
+        public static string SystemUserHint {
+            get {
+                return ResourceManager.GetString("SystemUserHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enter User....
         /// </summary>
         public static string UserExample {
@@ -116,9 +161,36 @@ namespace Flow.Launcher.Plugin.RemoteDesktop.Settings {
         /// <summary>
         ///   Looks up a localized string similar to User.
         /// </summary>
+        public static string UserFieldLabel {
+            get {
+                return ResourceManager.GetString("UserFieldLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User.
+        /// </summary>
         public static string UserHeader {
             get {
                 return ResourceManager.GetString("UserHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If you want to override the user for a new connection, first enter the regex to match the host name or ip address. Once that is done you can specify which user to use. If you leave the user field empty, the current system user is used..
+        /// </summary>
+        public static string UserOverrideDialogGuide {
+            get {
+                return ResourceManager.GetString("UserOverrideDialogGuide", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User Override.
+        /// </summary>
+        public static string UserOverrideDialogTitle {
+            get {
+                return ResourceManager.GetString("UserOverrideDialogTitle", resourceCulture);
             }
         }
     }

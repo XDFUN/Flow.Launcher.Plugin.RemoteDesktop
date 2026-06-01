@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows.Controls;
 using Flow.Launcher.Plugin.RemoteDesktop.Logging;
 using Flow.Launcher.Plugin.RemoteDesktop.Resources;
+using Flow.Launcher.Plugin.RemoteDesktop.Services;
 using Flow.Launcher.Plugin.RemoteDesktop.Settings;
 using Flow.Launcher.Plugin.SharedModels;
 
@@ -120,7 +121,7 @@ public class RemoteDesktop : IPlugin, IPluginI18n, ISettingProvider
     {
         _logger?.LogDebug("Creating settings panel");
 
-        var vm = new SettingsViewModel(Settings);
+        var vm = new SettingsViewModel(Settings, new DialogService());
 
         vm.Save += (_, args) =>
         {
