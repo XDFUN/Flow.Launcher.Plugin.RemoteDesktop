@@ -37,6 +37,7 @@ jobs:
   release:
     if: github.repository == 'XDFUN/Flow.Launcher.Plugin.RemoteDesktop'
     runs-on: windows-latest
+    needs: pre-release-check
     steps:
       - uses: actions/checkout@v6
         with:
