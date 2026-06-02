@@ -67,7 +67,7 @@
                   Internalize="true"
                   InputAssemblies="@(_InputAssemblies)"
                   TargetKind="Dll"
-                  OutputFile="$(OutputPath)\$(AssemblyName).dll"/>
+                  OutputFile="$(OutputPath)\$(_PLUGIN_NAME).dll"/>
 
         <ItemGroup>
             <_DeleteFiles Include="$(OutputPath)\$(_PLUGIN_NAME).Core.*"/>
