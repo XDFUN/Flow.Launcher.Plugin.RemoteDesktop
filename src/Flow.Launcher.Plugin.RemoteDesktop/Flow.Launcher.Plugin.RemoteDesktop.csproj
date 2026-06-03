@@ -56,26 +56,6 @@
       </EmbeddedResource>
     </ItemGroup>
 
-    <Target Name="ILRepacker" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
-        <ItemGroup>
-            <_InputAssemblies Include="$(OutputPath)\$(_PLUGIN_NAME).dll"/>
-            <_InputAssemblies Include="$(OutputPath)\$(_PLUGIN_NAME).Core.dll"/>
-            <_InputAssemblies Include="$(OutputPath)\$(_PLUGIN_NAME).Wpf.dll"/>
-        </ItemGroup>
 
-        <ILRepack Parallel="true"
-                  Internalize="true"
-                  InputAssemblies="@(_InputAssemblies)"
-                  TargetKind="Dll"
-                  OutputFile="$(OutputPath)\$(_PLUGIN_NAME).dll"/>
-
-        <ItemGroup>
-            <_DeleteFiles Include="$(OutputPath)\$(_PLUGIN_NAME).Core.*"/>
-            <_DeleteFiles Include="$(OutputPath)\$(_PLUGIN_NAME).Wpf.*"/>
-            <_DeleteFiles Include="$(OutputPath)\ILRepack*" />
-        </ItemGroup>
-
-        <Delete Files="@(_DeleteFiles)"/>
-    </Target>
 
 </Project>
