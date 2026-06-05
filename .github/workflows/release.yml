@@ -17,7 +17,7 @@ env:
   DOTNET_VERSION: 10.0.x
   PROJECT_PATH: ./src/Flow.Launcher.Plugin.RemoteDesktop/Flow.Launcher.Plugin.RemoteDesktop.csproj
   ZIP_FOLDER: publish
-  ZIP_NAME: remote-desktop-v${{ github.event.inputs.version }}.zip
+  ZIP_NAME: remote-desktop.zip
   VERSION_WITH_V: v${{ github.event.inputs.version }}
   VERSION_NO_V: ${{ github.event.inputs.version }}
   INSTALL_SCRIPT_LOCATION: ./scripts/install.ps1
