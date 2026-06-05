@@ -88,7 +88,14 @@ jobs:
       - name: Create the Github Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "${{ env.VERSION_WITH_V }}" --repo="${{ github.repository }}" --title="${{ env.VERSION_WITH_V }}" --notes-file "CHANGELOG.md"
+        run: |
+          PRERELEASE_FLAG=""
+
+          if [[ "${{ env.VERSION_WITH_V }}" == *-* ]]; then
+            PRERELEASE_FLAG="-p"
+          fi
+
+          gh release create "${{ env.VERSION_WITH_V }}" --repo="${{ github.repository }}" --title="${{ env.VERSION_WITH_V }}"--notes-file "CHANGELOG.md" ${PRERELEASE_FLAG}
 
       - name: Upload release asset
         env:
