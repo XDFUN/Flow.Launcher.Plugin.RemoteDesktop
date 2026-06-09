@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Project>
+    <PropertyGroup>
+        <_PLUGIN_NAME>Flow.Launcher.Plugin.RemoteDesktop</_PLUGIN_NAME>
+    </PropertyGroup>
+    
+    <Target Name="ILRepacker" AfterTargets="Publish" Condition="'$(Configuration)' == 'Release'">
+        <ItemGroup>
+            <_InputAssemblies Include="$(PublishDir)\$(_PLUGIN_NAME).dll"/>
+            <_InputAssemblies Include="$(PublishDir)\$(_PLUGIN_NAME).Core.dll"/>
+            <_InputAssemblies Include="$(PublishDir)\$(_PLUGIN_NAME).Wpf.dll"/>
+        </ItemGroup>
+
+        <ILRepack Parallel="true"
+                  Internalize="true"
+                  InputAssemblies="@(_InputAssemblies)"
+                  TargetKind="Dll"
+                  OutputFile="$(PublishDir)\$(_PLUGIN_NAME).dll"/>
+
+        <ItemGroup>
+            <_DeleteFiles Include="$(PublishDir)\$(_PLUGIN_NAME).Core.*"/>
+            <_DeleteFiles Include="$(PublishDir)\$(_PLUGIN_NAME).Wpf.*"/>
+            <_DeleteFiles Include="$(PublishDir)\ILRepack*"/>
+        </ItemGroup>
+
+        <Delete Files="@(_DeleteFiles)"/>
+    </Target>
+</Project>

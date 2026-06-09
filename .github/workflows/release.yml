@@ -17,7 +17,7 @@ env:
   DOTNET_VERSION: 10.0.x
   PROJECT_PATH: ./src/Flow.Launcher.Plugin.RemoteDesktop/Flow.Launcher.Plugin.RemoteDesktop.csproj
   ZIP_FOLDER: publish
-  ZIP_NAME: remote-desktop-v${{ github.event.inputs.version }}.zip
+  ZIP_NAME: remote-desktop.zip
   VERSION_WITH_V: v${{ github.event.inputs.version }}
   VERSION_NO_V: ${{ github.event.inputs.version }}
   INSTALL_SCRIPT_LOCATION: ./scripts/install.ps1
@@ -37,6 +37,7 @@ jobs:
   release:
     if: github.repository == 'XDFUN/Flow.Launcher.Plugin.RemoteDesktop'
     runs-on: windows-latest
+    needs: pre-release-check
     steps:
       - uses: actions/checkout@v6
         with:
@@ -87,9 +88,19 @@ jobs:
       - name: Create the Github Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "${{ env.VERSION_WITH_V }}" --repo="${{ github.repository }}" --title="${{ env.VERSION_WITH_V }}" --notes-file "CHANGELOG.md"
+        run: |
+          PRERELEASE_FLAG=""
+
+          if [[ "${{ env.VERSION_WITH_V }}" == *-* ]]; then
+            PRERELEASE_FLAG="-p"
+          fi
+
+          gh release create "${{ env.VERSION_WITH_V }}" --repo="${{ github.repository }}" --title="${{ env.VERSION_WITH_V }}"--notes-file "CHANGELOG.md" ${PRERELEASE_FLAG}
 
       - name: Upload release asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ env.VERSION_WITH_V }}" "${{ env.ZIP_NAME }}" "${{ env.INSTALL_SCRIPT_LOCATION }}" --clobber
+        run: gh release upload "${{ env.VERSION_WITH_V }}" "${{ env.ZIP_NAME }}" --clobber
+        # Temporarily remove the install script as it messes with the store update
+        # See https://github.com/Flow-Launcher/Flow.Launcher.PluginsManifest/issues/669
+        # "${{ env.INSTALL_SCRIPT_LOCATION }}"
