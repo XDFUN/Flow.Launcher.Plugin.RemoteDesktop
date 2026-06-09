@@ -86,16 +86,17 @@ jobs:
           GITHUB_REPO: ${{ github.repository }}
 
       - name: Create the Github Release
+        shell: pwsh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PRERELEASE_FLAG=""
+          $prereleaseFlag = ""
+  
+          if ("${{ env.VERSION_WITH_V }}" -match '^[0-9]+\.[0-9]+\.[0-9]+-') {
+              $prereleaseFlag = "-p"
+          }
 
-          if [[ "${{ env.VERSION_WITH_V }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+- ]]; then
-            PRERELEASE_FLAG="-p"
-          fi
-
-          gh release create "${{ env.VERSION_WITH_V }}" --repo="${{ github.repository }}" --title="${{ env.VERSION_WITH_V }}"--notes-file "CHANGELOG.md" ${PRERELEASE_FLAG}
+          gh release create "${{ env.VERSION_WITH_V }}" --repo="${{ github.repository }}" --title="${{ env.VERSION_WITH_V }}"--notes-file "CHANGELOG.md" $prereleaseFlag
 
       - name: Upload release asset
         env:
