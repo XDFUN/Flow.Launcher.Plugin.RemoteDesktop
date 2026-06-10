@@ -92,8 +92,8 @@ jobs:
         run: |
             $ghArgs = @(
                 "release", "create", "${{ env.VERSION_WITH_V }}",
-                "--repo=${{ github.repository }}",
-                "--title=${{ env.VERSION_WITH_V }}",
+                "--repo", "${{ github.repository }}",
+                "--title", "${{ env.VERSION_WITH_V }}",
                 "--notes-file", "CHANGELOG.md"
             )
 
