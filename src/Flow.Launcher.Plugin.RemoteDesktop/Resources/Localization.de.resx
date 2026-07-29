@@ -20,4 +20,7 @@
     <data name="ResultSubtitle" xml:space="preserve">
         <value>Mit Remotedesktop verbinden</value>
     </data>
+    <data name="ResultSubtitleWithHost" xml:space="preserve">
+        <value>Mit Remotedesktop eine Verbindung zu {0} herstellen</value>
+    </data>
 </root>

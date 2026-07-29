@@ -56,4 +56,37 @@
     <data name="DefaultUserHint" xml:space="preserve">
         <value>Benutze Standardbenutzer</value>
     </data>
+    <data name="AddAlias" xml:space="preserve">
+        <value>Hinzufügen</value>
+    </data>
+    <data name="AliasDialogGuide" xml:space="preserve">
+        <value>Richten Sie einen benutzerfreundlichen Alias für einen Host (DNS oder IP) ein. Beide Felder müssen ausgefüllt werden.</value>
+    </data>
+    <data name="AliasDialogTitle" xml:space="preserve">
+        <value>Alias</value>
+    </data>
+    <data name="AliasExample" xml:space="preserve">
+        <value>Alias eingeben...</value>
+    </data>
+    <data name="AliasFieldLabel" xml:space="preserve">
+        <value>Alias*</value>
+    </data>
+    <data name="AliasHeader" xml:space="preserve">
+        <value>Alias</value>
+    </data>
+    <data name="DeleteAlias" xml:space="preserve">
+        <value>Löschen</value>
+    </data>
+    <data name="EditAlias" xml:space="preserve">
+        <value>Editieren</value>
+    </data>
+    <data name="HostExample" xml:space="preserve">
+        <value>Host eingeben...</value>
+    </data>
+    <data name="HostFieldLabel" xml:space="preserve">
+        <value>Host*</value>
+    </data>
+    <data name="HostHeader" xml:space="preserve">
+        <value>Host</value>
+    </data>
 </root>

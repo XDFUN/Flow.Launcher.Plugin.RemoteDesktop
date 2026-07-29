@@ -10,7 +10,6 @@ using Flow.Launcher.Plugin.RemoteDesktop.Resources;
 using Flow.Launcher.Plugin.RemoteDesktop.Services;
 using Flow.Launcher.Plugin.RemoteDesktop.Settings;
 using Flow.Launcher.Plugin.SharedModels;
-
 using Localization = Flow.Launcher.Plugin.RemoteDesktop.Resources.Localization;
 
 namespace Flow.Launcher.Plugin.RemoteDesktop;
@@ -21,9 +20,9 @@ namespace Flow.Launcher.Plugin.RemoteDesktop;
 public class RemoteDesktop : IPlugin, IPluginI18n, ISettingProvider
 {
     private const string ICO_PATH = "Images/icon.png";
+    private readonly Lazy<SettingsControl> _settingsControl;
 
     private ContextLogger<RemoteDesktop>? _logger;
-    private readonly Lazy<SettingsControl> _settingsControl;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public RemoteDesktop()
@@ -127,6 +126,7 @@ public class RemoteDesktop : IPlugin, IPluginI18n, ISettingProvider
         {
             Settings.DefaultUser = args.Settings.DefaultUser;
             Settings.UserOverrides = args.Settings.UserOverrides;
+            Settings.Aliases = args.Settings.Aliases;
 
             Context.API.SaveSettingJsonStorage<RemoteDesktopSettings>();
         };
@@ -144,10 +144,13 @@ public class RemoteDesktop : IPlugin, IPluginI18n, ISettingProvider
             : UsernameSelector.GetUsername(ipOrHostname);
     }
 
-    private Result GetResult(string ipOrHostname)
+    private Result GetResult(string displayName)
     {
-        string? user = GetDefaultUser(ipOrHostname);
-        string title = ipOrHostname;
+        // Resolve alias → actual host if needed
+        string actualHost = ResolveAlias(displayName);
+
+        string? user = GetDefaultUser(actualHost);
+        string title = displayName;
 
         if (!string.IsNullOrWhiteSpace(user))
         {
@@ -157,18 +160,20 @@ public class RemoteDesktop : IPlugin, IPluginI18n, ISettingProvider
         return new Result
         {
             Title = title,
-            AutoCompleteText = ipOrHostname,
-            SubTitle = Localization.ResultSubtitle,
+            AutoCompleteText = displayName,
+            SubTitle = displayName.Equals(actualHost, StringComparison.OrdinalIgnoreCase)
+                ? Localization.ResultSubtitle
+                : string.Format(Localization.ResultSubtitleWithHost, actualHost),
             IcoPath = ICO_PATH,
             Action = _ =>
             {
-                _logger?.LogDebug($"Opening connection to {ipOrHostname}");
-                RegistryManager.CreateServerHint(ipOrHostname, user);
+                _logger?.LogDebug($"Opening connection to {actualHost} (requested '{displayName}')");
+                RegistryManager.CreateServerHint(actualHost, user);
 
                 var processInfo = new ProcessStartInfo
                 {
                     FileName = Settings.MstscPath,
-                    Arguments = $"/v:{ipOrHostname}",
+                    Arguments = $"/v:{actualHost}",
                     UseShellExecute = true,
                     CreateNoWindow = true,
                 };
@@ -199,6 +204,7 @@ public class RemoteDesktop : IPlugin, IPluginI18n, ISettingProvider
         Dictionary<string, double> recentConnections = RegistryManager.GetRecentConnection();
 
         string[] connectionHistory = RegistryManager.GetConnectionHistory();
+        Dictionary<string, string> aliases = Settings.Aliases ?? new Dictionary<string, string>();
 
         if (connectionHistory.Length == 0)
         {
@@ -207,8 +213,13 @@ public class RemoteDesktop : IPlugin, IPluginI18n, ISettingProvider
             return;
         }
 
+        string[] candidates = connectionHistory.Concat(aliases.Keys)
+                                               .Distinct(StringComparer.OrdinalIgnoreCase)
+                                               .ToArray();
+
         results.AddRange(
-            ScoreConnections(search, connectionHistory, recentConnections).Select(matchResult => matchResult.Connection)
+            ScoreConnections(search, candidates, recentConnections, aliases)
+                .Select(matchResult => matchResult.Connection)
         );
     }
 
@@ -230,16 +241,27 @@ public class RemoteDesktop : IPlugin, IPluginI18n, ISettingProvider
         }
     }
 
+    private string ResolveAlias(string displayName)
+    {
+        if (Settings.Aliases != null && Settings.Aliases.TryGetValue(displayName, out string? host))
+        {
+            return host;
+        }
+
+        return displayName;
+    }
+
     private List<ScoredConnection> ScoreConnections(
         string search,
-        string[] connectionHistory,
-        Dictionary<string, double> recents
+        string[] candidates,
+        Dictionary<string, double> recents,
+        Dictionary<string, string> aliases
     )
     {
         var scoredConnections = new List<ScoredConnection>();
         int totalRecents = recents.Count;
 
-        foreach (string connection in connectionHistory)
+        foreach (string connection in candidates)
         {
             MatchResult? match = Context.API.FuzzySearch(search, connection);
 
@@ -250,7 +272,9 @@ public class RemoteDesktop : IPlugin, IPluginI18n, ISettingProvider
 
             double recencyBonus = 0;
 
-            if (recents.TryGetValue(connection, out double weight))
+            string actualHost = aliases.TryGetValue(connection, out string? host) ? host : connection;
+
+            if (recents.TryGetValue(actualHost, out double weight))
             {
                 recencyBonus = Settings.MaxRecentScore
                                - (weight * (Settings.MaxRecentScore / Math.Max(totalRecents, 1)));

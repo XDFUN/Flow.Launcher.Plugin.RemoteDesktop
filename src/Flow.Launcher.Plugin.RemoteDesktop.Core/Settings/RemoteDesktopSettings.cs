@@ -3,6 +3,11 @@ namespace Flow.Launcher.Plugin.RemoteDesktop.Settings;
 public class RemoteDesktopSettings
 {
     /// <summary>
+    ///     Aliases for hosts. Key = alias shown in search, Value = actual host (dns or ip).
+    /// </summary>
+    public Dictionary<string, string>? Aliases { get; set; }
+
+    /// <summary>
     ///     The default user for the remote desktop connection.
     /// </summary>
     public string? DefaultUser { get; set; }

@@ -20,15 +20,37 @@ internal class LocalizationManager : INotifyPropertyChanged, IDisposable
         GuiCultureProvider.CultureChanged -= OnCultureChanged;
     }
 
+    public string AddAlias => Localization.AddAlias;
+
     public string AddOverride => Localization.AddOverride;
+
+    public string AliasDialogGuide => Localization.AliasDialogGuide;
+
+    public string AliasDialogTitle => Localization.AliasDialogTitle;
+
+    public string AliasExample => Localization.AliasExample;
+
+    public string AliasFieldLabel => Localization.AliasFieldLabel;
+
+    public string AliasHeader => Localization.AliasHeader;
 
     public string DefaultUserFieldLabel => Localization.DefaultUserFieldLabel;
 
     public string DefaultUserHint => Localization.DefaultUserHint;
 
+    public string DeleteAlias => Localization.DeleteAlias;
+
     public string DeleteOverride => Localization.DeleteOverride;
 
+    public string EditAlias => Localization.EditAlias;
+
     public string EditOverride => Localization.EditOverride;
+
+    public string HostExample => Localization.HostExample;
+
+    public string HostFieldLabel => Localization.HostFieldLabel;
+
+    public string HostHeader => Localization.HostHeader;
 
     public string RegexExample => Localization.RegexExample;
 
