@@ -62,9 +62,63 @@ namespace Flow.Launcher.Plugin.RemoteDesktop.Settings {
         /// <summary>
         ///   Looks up a localized string similar to Add.
         /// </summary>
+        public static string AddAlias {
+            get {
+                return ResourceManager.GetString("AddAlias", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add.
+        /// </summary>
         public static string AddOverride {
             get {
                 return ResourceManager.GetString("AddOverride", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Configure a friendly alias for a host (DNS or IP). Both fields are required..
+        /// </summary>
+        public static string AliasDialogGuide {
+            get {
+                return ResourceManager.GetString("AliasDialogGuide", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alias.
+        /// </summary>
+        public static string AliasDialogTitle {
+            get {
+                return ResourceManager.GetString("AliasDialogTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter Alias....
+        /// </summary>
+        public static string AliasExample {
+            get {
+                return ResourceManager.GetString("AliasExample", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alias*.
+        /// </summary>
+        public static string AliasFieldLabel {
+            get {
+                return ResourceManager.GetString("AliasFieldLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alias.
+        /// </summary>
+        public static string AliasHeader {
+            get {
+                return ResourceManager.GetString("AliasHeader", resourceCulture);
             }
         }
         
@@ -89,6 +143,15 @@ namespace Flow.Launcher.Plugin.RemoteDesktop.Settings {
         /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
+        public static string DeleteAlias {
+            get {
+                return ResourceManager.GetString("DeleteAlias", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
         public static string DeleteOverride {
             get {
                 return ResourceManager.GetString("DeleteOverride", resourceCulture);
@@ -98,9 +161,45 @@ namespace Flow.Launcher.Plugin.RemoteDesktop.Settings {
         /// <summary>
         ///   Looks up a localized string similar to Edit.
         /// </summary>
+        public static string EditAlias {
+            get {
+                return ResourceManager.GetString("EditAlias", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit.
+        /// </summary>
         public static string EditOverride {
             get {
                 return ResourceManager.GetString("EditOverride", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter Host....
+        /// </summary>
+        public static string HostExample {
+            get {
+                return ResourceManager.GetString("HostExample", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Host*.
+        /// </summary>
+        public static string HostFieldLabel {
+            get {
+                return ResourceManager.GetString("HostFieldLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Host.
+        /// </summary>
+        public static string HostHeader {
+            get {
+                return ResourceManager.GetString("HostHeader", resourceCulture);
             }
         }
         

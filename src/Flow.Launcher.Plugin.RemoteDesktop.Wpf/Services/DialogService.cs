@@ -10,6 +10,7 @@ public class DialogService : IDialogService
     public DialogService()
     {
         _windowFactories[typeof(UserOverrideViewModel)] = () => new UserOverrideWindow();
+        _windowFactories[typeof(AliasViewModel)] = () => new AliasWindow();
     }
 
     public bool Show<T>(T viewModel)

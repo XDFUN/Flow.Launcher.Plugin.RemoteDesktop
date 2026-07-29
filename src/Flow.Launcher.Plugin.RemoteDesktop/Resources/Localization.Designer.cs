@@ -85,5 +85,14 @@ namespace Flow.Launcher.Plugin.RemoteDesktop.Resources {
                 return ResourceManager.GetString("ResultSubtitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect to {0} with Remote Desktop.
+        /// </summary>
+        internal static string ResultSubtitleWithHost {
+            get {
+                return ResourceManager.GetString("ResultSubtitleWithHost", resourceCulture);
+            }
+        }
     }
 }

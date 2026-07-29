@@ -19,6 +19,9 @@
             <RowDefinition Height="Auto" />
             <RowDefinition />
             <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -113,7 +116,83 @@
                    Grid.Column="0"
                    Grid.ColumnSpan="2" Style="{StaticResource SettingPanelSeparatorStyle}" />
 
-        <Button Grid.Row="4"
+        <!-- Aliases List -->
+        <ListView Grid.Row="4"
+                  Grid.Column="0"
+                  Grid.ColumnSpan="2"
+                  ItemsSource="{Binding Aliases}"
+                  Style="{StaticResource {x:Static GridView.GridViewStyleKey}}"
+                  Margin="{StaticResource SettingPanelItemTopBottomMargin}"
+                  MaxHeight="385"
+                  AllowDrop="True"
+                  BorderBrush="DarkGray"
+                  BorderThickness="1"
+                  behaviors:ListViewSelectedItemsBehavior.BindableSelectedItems="{Binding SelectedAliases}"
+                  MouseDoubleClick="AliasList_MouseDoubleClickItem"
+                  PreviewMouseLeftButtonDown="AliasList_PreviewMouseLeftButtonDown"
+                  PreviewMouseMove="AliasList_PreviewMouseMove"
+                  Drop="AliasList_Drop"
+                  SizeChanged="AliasList_SizeChanged">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="{Binding AliasHeader, Source={StaticResource Localization}}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type settings:AliasViewModel}">
+                                <TextBlock Margin="0 6" Text="{Binding Alias}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="{Binding HostHeader, Source={StaticResource Localization}}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type settings:AliasViewModel}">
+                                <TextBlock Margin="0 6" Text="{Binding Host}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style TargetType="GridViewColumnHeader"
+                               BasedOn="{StaticResource {x:Type GridViewColumnHeader}}">
+                            <!-- The border adds 2 pixel, we just remove them from the header -->
+                            <Setter Property="Height" Value="33" />
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
+                </GridView>
+            </ListView.View>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem"
+                       BasedOn="{StaticResource {x:Static GridView.GridViewItemContainerStyleKey}}">
+                    <Setter Property="Height" Value="35" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
+
+        <StackPanel Grid.Row="5"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Margin="{StaticResource SettingPanelItemTopBottomMargin}"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+            <Button Width="100"
+                    Margin="{StaticResource SettingPanelItemLeftMargin}"
+                    Content="{Binding DeleteAlias, Source={StaticResource Localization}}"
+                    Command="{Binding DeleteAliasesCommand}" />
+            <Button Width="100"
+                    Margin="{StaticResource SettingPanelItemLeftMargin}"
+                    Content="{Binding EditAlias, Source={StaticResource Localization}}"
+                    Command="{Binding EditAliasCommand}" />
+            <Button Width="100"
+                    Margin="{StaticResource SettingPanelItemLeftMargin}"
+                    Content="{Binding AddAlias, Source={StaticResource Localization}}"
+                    Command="{Binding AddAliasCommand}" />
+        </StackPanel>
+
+        <Separator Grid.Row="6"
+                   Grid.Column="0"
+                   Grid.ColumnSpan="2" Style="{StaticResource SettingPanelSeparatorStyle}" />
+
+        <Button Grid.Row="7"
                 Grid.Column="0"
                 Margin="{StaticResource SettingPanelItemTopBottomMargin}"
                 Content="{Binding Save, Source={StaticResource Localization}}"
