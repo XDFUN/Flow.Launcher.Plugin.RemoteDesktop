@@ -106,7 +106,4 @@ jobs:
       - name: Upload release asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ env.VERSION_WITH_V }}" "${{ env.ZIP_NAME }}" --clobber
-        # Temporarily remove the install script as it messes with the store update
-        # See https://github.com/Flow-Launcher/Flow.Launcher.PluginsManifest/issues/669
-        # "${{ env.INSTALL_SCRIPT_LOCATION }}"
+        run: gh release upload "${{ env.VERSION_WITH_V }}" "${{ env.ZIP_NAME }}" "${{ env.INSTALL_SCRIPT_LOCATION }}" --clobber
