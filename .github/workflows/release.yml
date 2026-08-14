@@ -102,7 +102,7 @@ jobs:
         id: git-cliff
         with:
           config: cliff.toml
-          args: ${{ steps.cliff-baseline.outputs.previous }}..${{ env.VERSION_WITH_V }} -t ${{ env.VERSION_WITH_V }} --sort newest --offline
+          args: ${{ steps.cliff-baseline.outputs.previous }}.. -t ${{ env.VERSION_WITH_V }} --sort newest --offline
         env:
           OUTPUT: CHANGELOG.md
           GITHUB_REPO: ${{ github.repository }}
