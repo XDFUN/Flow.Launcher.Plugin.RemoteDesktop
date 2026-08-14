@@ -1,7 +1,7 @@
 $REPO = "XDFUN/Flow.Launcher.Plugin.RemoteDesktop"
 $VERSION = "" # <-- will be injected by GitHub Actions
 $VERSION_WITHOUT_V = $VERSION.Substring(1)
-$ZIP_NAME = "remote-desktop-$VERSION.zip"
+$ZIP_NAME = "remote-desktop.zip"
 
 $AppDataFolder = [Environment]::GetFolderPath("ApplicationData")
 $EXTRACTION_TARGET = "$AppDataFolder\FlowLauncher\Plugins\RemoteDesktop-$VERSION_WITHOUT_V"
