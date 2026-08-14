@@ -75,12 +75,34 @@ jobs:
         shell: pwsh
         run: (Get-Content "${{ env.INSTALL_SCRIPT_LOCATION }}") -replace '\$VERSION = ".*"', '$VERSION = "${{ env.VERSION_WITH_V }}"' | Set-Content "${{ env.INSTALL_SCRIPT_LOCATION }}"
 
+      - name: Determine git-cliff baseline
+        id: cliff-baseline
+        shell: pwsh
+        env:
+          VERSION_WITH_V: ${{ env.VERSION_WITH_V }}
+          STABLE_TAG_REGEX: '^v[0-9]+\.[0-9]+\.[0-9]+$'
+        run: |
+          $current = $env:VERSION_WITH_V
+
+          if ($current -match $env:STABLE_TAG_REGEX) {
+            $previous = git tag --list 'v*' --sort=-version:refname |
+              Where-Object { $_ -match $env:STABLE_TAG_REGEX -and $_ -ne $current } |
+              Select-Object -First 1
+          } else {
+            $previous = git tag --list 'v*' --sort=-version:refname |
+              Where-Object { $_ -ne $current } |
+              Select-Object -First 1
+          }
+
+          Write-Host "Previous tag: $previous"
+          "previous=$previous" >> $env:GITHUB_OUTPUT
+
       - name: git-cliff - Changelog Generator
         uses: orhun/git-cliff-action@v4
         id: git-cliff
         with:
           config: cliff.toml
-          args: -t ${{ env.VERSION_WITH_V }} --unreleased --sort newest --offline
+          args: ${{ steps.cliff-baseline.outputs.previous }}..${{ env.VERSION_WITH_V }} -t ${{ env.VERSION_WITH_V }} --sort newest --offline
         env:
           OUTPUT: CHANGELOG.md
           GITHUB_REPO: ${{ github.repository }}
