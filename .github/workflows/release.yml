@@ -85,6 +85,7 @@ jobs:
           $current = $env:VERSION_WITH_V
 
           if ($current -match $env:STABLE_TAG_REGEX) {
+            "ignore_tags=.+-.*" >> $env:GITHUB_OUTPUT
             $previous = git tag --list 'v*' --sort=-version:refname |
               Where-Object { $_ -match $env:STABLE_TAG_REGEX -and $_ -ne $current } |
               Select-Object -First 1
@@ -102,7 +103,7 @@ jobs:
         id: git-cliff
         with:
           config: cliff.toml
-          args: ${{ steps.cliff-baseline.outputs.previous }}.. -t ${{ env.VERSION_WITH_V }} --sort newest --offline
+          args: ${{ steps.cliff-baseline.outputs.previous }}.. -t ${{ env.VERSION_WITH_V }} --ignore-tags "^${{ steps.cliff-baseline.outputs.ignore_tags }}$" --sort newest --offline
         env:
           OUTPUT: CHANGELOG.md
           GITHUB_REPO: ${{ github.repository }}
